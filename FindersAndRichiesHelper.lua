@@ -15,13 +15,8 @@ FindersAndRichiesHelper = LibStub("AceAddon-3.0"):NewAddon("FindersAndRichiesHel
 
 local defaultSettings = {
   global = {
-    hintFrame = {
-      locked = false,
-      left = false,
-      top = false,
-      distance = 100
-      -- TODO limit missing or all (configurable)
-    }
+	-- verify which variables need to be stored to previous use
+	variables = false
   }
 }
 
@@ -226,19 +221,19 @@ function FindersAndRichiesHelper:SetAchievementWaypoints(limitZone, limitMissing
 				else
 					self:Print("adding waypoint to " .. a.desc)
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc)
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 				end
 			else
 				if( IsQuestFlaggedCompleted(a.qid)) then
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc .. ' (Already found)')
 					--check if npc
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 				else
 					self:Print("adding waypoint to " .. a.desc)
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc)
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 					--check if npc
 				end
@@ -250,20 +245,20 @@ function FindersAndRichiesHelper:SetAchievementWaypoints(limitZone, limitMissing
 				else
 					self:Print("adding waypoint to " .. a.desc)
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc)
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 					--check if npc
 				end
 			else
-				if( not IsQuestFlaggedCompleted(a.qid)) then
+				if(IsQuestFlaggedCompleted(a.qid)) then
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc .. ' (Already found)')
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 					--check if npc
 				else
 					self:Print("adding waypoint to " .. a.desc)
 					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.y / 100, a.pos.x / 100, a.desc)
-					if (a.npc)
+					if (a.npc ~= nil)
 						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
 					--check if npc
 				end
@@ -330,13 +325,13 @@ end
 local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
 
 -- local LibQTip = LibStub('LibQTip-1.0')
-local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("LorewalkersHelper",
+local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("FindersAndRichiesHelper",
 {
   type = "data source",
-  label = "Lorewalkers Helper",
-  text = "Lorewalkers Helper",
+  label = "Finders and Richies Helper",
+  text = "Finders and Richies Helper",
   -- icon = "Interface\\Icons\\Ability_mount_cloudmount",
-  icon = "Interface\\Icons\\achievement_faction_lorewalkers",
+  icon = "Interface\\Icons\\achievement_faction_lorewalkers", --temporary icon until I find how to use this functionality
   OnClick = function(clickedFrame, button)
     -- Click to add waypoints to missing criteria in current zone. (default)
     -- Shift-Click to add waypoints to missing criteria in Pandaria.
@@ -344,9 +339,11 @@ local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("LorewalkersHelper",
     -- Alt-Shift-Click to add waypoints to all criteria in Pandaria.
     if button == "LeftButton" then
       -- LorewalkersHelper:SetWaypoints(limitZone, limitMissing)
-      LorewalkersHelper:SetWaypoints(not IsShiftKeyDown(), not IsAltKeyDown())
+	  self:Print('Testing 1 LDB addon')
+      -- LorewalkersHelper:SetWaypoints(not IsShiftKeyDown(), not IsAltKeyDown())
     elseif button == "RightButton" then
-      LorewalkersHelper:ToggleMoveHintFrame()
+		self:Print('Testing 2 LDB addon')
+      -- LorewalkersHelper:ToggleMoveHintFrame()
     end
   end,
 });
@@ -355,38 +352,13 @@ function LDB:OnTooltipShow()
   local zoneName, zoneId, counts, i, a, c
   self:AddLine("Lorewalkers Helper")
 
-  self:AddLine(L["Missing achievements criteria in current zone"])
+  self:AddLine("Missing achievements criteria in current zone")
 
   zoneId = -1
   zoneName = GetZoneText()
   counts = {}
   for i, a in pairs(achiMap) do
     for i, c in pairs(a[2].p) do
-      --[===[@alpha@
-      if not select(3, GetAchievementCriteriaInfoByID(a[1], c.id)) then
-        if counts[c.m] then
-          counts[c.m] = counts[c.m] + 1
-        else
-          counts[c.m] = 1
-        end
-        if zoneName == GetMapNameByID(c.m) then
-          zoneId = c.m -- store it for later use ^^
-          self:AddLine("|cffff0000" ..
-                       select(1, GetAchievementCriteriaInfoByID(a[1], c.id)) ..
-                       "|r" ..
-                       " (" .. a[1] .. " - " .. c.id .. ")")
-        end
-      else
-        if zoneName == GetMapNameByID(c.m) then
-          zoneId = c.m -- store it for later use ^^
-          self:AddLine("|cff00ff00" ..
-                       select(1, GetAchievementCriteriaInfoByID(a[1], c.id)) ..
-                       "|r" ..
-                       " (" .. a[1] .. " - " .. c.id .. ")")
-        end
-      end
-      --@end-alpha@]===]
-      --@non-alpha@
       if not select(3, GetAchievementCriteriaInfoByID(a[1], c.id)) then
         if counts[c.m] then
           counts[c.m] = counts[c.m] + 1
@@ -400,16 +372,15 @@ function LDB:OnTooltipShow()
                        "|r")
         end
       end
-      --@end-non-alpha@
     end
   end
 
   if zoneId >= 0 and not counts[zoneId]  then
-    self:AddLine(L["Nothing missing in current zone!"])
+    self:AddLine("Nothing missing in current zone!")
   end
 
   self:AddLine(" ")
-  self:AddLine(L["Missing criteria in other zones"])
+  self:AddLine("Missing criteria in other zones")
 
   for i, c in pairs(counts) do
     if i ~= zoneId then
@@ -429,25 +400,11 @@ function LDB:OnTooltipShow()
 
   self:AddLine(" ")
   -- colors are Alpha Red Green Blue
-  self:AddLine("|cffed55aaClick|r: " .. L["add waypoints to missing criteria in current zone"])
-  self:AddLine("|cffed55aaShift-Click|r: " .. L["add waypoints to missing criteria in all Pandaria zones"])
-  self:AddLine("|cffed55aaAlt-Click|r: " .. L["add waypoints to every criteria in current zone"])
-  self:AddLine("|cffed55aaAlt-Shift-Click|r: " .. L["add waypoints to every criteria across Pandaria"])
-  self:AddLine("|cffed55aaRightClick|r: " .. L["lock/unlock info panel"])
-
-
-  --[===[@debug@
-  -- for i, a in pairs(achiMap) do
-  --   for i, c in pairs(a[2].p) do
-  --     self:AddLine(a[1] .. "." .. c.id .. " (" .. c.m .. ": " .. c.x .. ", " .. c.y .. "): " ..
-  --                  "|cffff0000" ..
-  --                  select(1, GetAchievementCriteriaInfoByID(a[1], c.id)) ..
-  --                  "|r")
-  --   end
-  -- end
-  --@end-debug@]===]
-  --[===[@non-debug@
-  --@non-debug@]===]
+  self:AddLine("|cffed55aaClick|r: " .. "add waypoints to missing criteria in current zone")
+  self:AddLine("|cffed55aaShift-Click|r: " .. "add waypoints to missing criteria in all Pandaria zones")
+  self:AddLine("|cffed55aaAlt-Click|r: " .. "add waypoints to every criteria in current zone")
+  self:AddLine("|cffed55aaAlt-Shift-Click|r: " .. "add waypoints to every criteria across Pandaria")
+  self:AddLine("|cffed55aaRightClick|r: " .. "lock/unlock info panel")
 
 end
 
