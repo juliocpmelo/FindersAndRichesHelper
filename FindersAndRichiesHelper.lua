@@ -13,7 +13,7 @@ local Astrolabe = DongleStub("Astrolabe-1.0")
 
 FindersAndRichiesHelper = LibStub("AceAddon-3.0"):NewAddon("FindersAndRichiesHelper", "AceConsole-3.0")
 
-
+local addonName = "Finders And Richies Helper (frh)"
 
 
 
@@ -153,16 +153,18 @@ end
 	self.settings = LibStub("AceDB-3.0"):New("FRH_Settings", defaultSettings, true)
   
 	if updaterFrame == nil then
-		updaterFrame = CreateFrame("frame")
-		updaterFrame.name = "Finders And Richies Helper (frh)"
+		--updaterFrame = CreateFrame("frame")
+		
+		
+		
+		--InterfaceOptions_AddCategory(updaterFrame)
+		local AceConfig = LibStub("AceConfig-3.0")
+		AceConfig:RegisterOptionsTable("Finders And Richies Helper (frh)", function () return self:InterfaceOptions() end)
+		updaterFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Richies Helper (frh)")
 		updaterFrame:SetScript("OnEvent", eventHandler)
 		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		
-		InterfaceOptions_AddCategory(updaterFrame)
-		local AceConfig = LibStub("AceConfig-3.0")
-		--AceConfig:RegisterOptionsTable("Finders And Richies Helper (frh)", function () return self:confirutationOptions() end)
-		--local interfaceFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Richies Helper (frh)")
 		updaterFrame:Show()
 	end
 end
@@ -412,6 +414,7 @@ end
 
 function FindersAndRichiesHelper:OnEnable()
   -- Called when the addon is enabled
+  --[[
   if not updaterFrame then
     --[===[@debug@
     LorewalkersHelper:Print('CreateFrame: LorewalkersHelperUpdaterFrame')
@@ -424,6 +427,7 @@ function FindersAndRichiesHelper:OnEnable()
     updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
   end
   updaterFrame:Show()
+  ]]--
 end
 
 function FindersAndRichiesHelper:OnDisable()
@@ -533,6 +537,75 @@ function LDB:OnLeave()
   GameTooltip:Hide()
 end
 
+function FindersAndRichiesHelper:InterfaceOptions()
+	local texSize = 20
+	local canBeTank, canBeHealer, canBeDamager = UnitGetAvailableRoles("player")
+	local greyTint = {155, 155, 155}
+	return {
+		name = addonName,
+		type = "group",
+		--get = function(info) return self.settings.global[] end,
+		--set = function(info, val) self.settings.global[info[#info]] = val end,
+		args = {
+			findersKeepersOptions = {
+				icon = "Interface\\Icons\\achievement_faction_lorewalkers",
+				name = "Finders Keepers",
+				type = "group",
+				inline = true,
+				order = 1,
+				get = function(info) return self.Print("getting value of " .. info) end,
+				set = function(info, val) self.Print("Setting " .. info .. " to " .. val) end,
+				args = {
+					enable = {
+						name = "Enable\n", -- newline for spacing reasons
+						type = "toogle",
+						order = 0
+					},
+					zone = {
+						name = "Zone only",
+						type = "toggle",
+						--width = "half",
+						order = 1,
+					},
+					missing = {
+						name = "Missing only",
+						type = "toogle",
+						width = "half",
+						order = 2,
+					}
+				}
+			},
+			richiesOfPandaria = {
+				icon = "Interface\\Icons\\achievement_faction_lorewalkers",
+				name = "Finders Keepers",
+				type = "group",
+				inline = true,
+				order = 2,
+				get = function(info) return self.Print("getting value of " .. info) end,
+				set = function(info, val) self.Print("Setting " .. info .. " to " .. val) end,
+				args = {
+					enable = {
+						name = "Enable\n", -- newline for spacing reasons
+						type = "toogle",
+						order = 0
+					},
+					zone = {
+						name = "Zone only",
+						type = "toggle",
+						--width = "half",
+						order = 1,
+					},
+					missing = {
+						name = "Missing only",
+						type = "toogle",
+						width = "half",
+						order = 2,
+					}
+				}
+			}
+		}
+	}
+end
 
 
 
