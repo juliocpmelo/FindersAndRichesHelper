@@ -27,6 +27,8 @@ local defaultSettings = {
   }
 }
 
+local updaterFrame = nil
+
 -- richies of pandaria locations according wowhead (12/03/12)						 
 local richiesOfPandaria	={ --Jade Forest items
 						 {map=806, qid = 31400 , desc = 'Ancient Pandaren Tea Pot', pos = { x=26.22 , y=32.35}},
@@ -142,6 +144,7 @@ function eventHandler(frame, event, ...)
 end
 
  
+ 
  function FindersAndRichiesHelper:OnInitialize()
 	-- Called when the addon is loaded
 	self:RegisterChatCommand("findersandrichieshelper", "SlashCommand")
@@ -149,11 +152,16 @@ end
 
 	self.settings = LibStub("AceDB-3.0"):New("FRH_Settings", defaultSettings, true)
   
-	updaterFrame = CreateFrame("frame")
-	updaterFrame:SetScript("OnEvent", eventHandler)
-	updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-	updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	updaterFrame:Show()
+	if updaterFrame == nil then
+		updaterFrame = CreateFrame("frame")
+		updaterFrame.name = "Finders And Richies Helper (frh)"
+		updaterFrame:SetScript("OnEvent", eventHandler)
+		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+		
+		InterfaceOptions_AddCategory(updaterFrame)
+		updaterFrame:Show()
+	end
 end
 
 function FindersAndRichiesHelper:PrintUsage()
