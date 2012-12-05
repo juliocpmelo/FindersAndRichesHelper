@@ -160,6 +160,9 @@ end
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		
 		InterfaceOptions_AddCategory(updaterFrame)
+		local AceConfig = LibStub("AceConfig-3.0")
+		--AceConfig:RegisterOptionsTable("Finders And Richies Helper (frh)", function () return self:confirutationOptions() end)
+		--local interfaceFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Richies Helper (frh)")
 		updaterFrame:Show()
 	end
 end
