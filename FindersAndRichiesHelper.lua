@@ -20,8 +20,8 @@ local addonName = "Finders And Richies Helper (frh)"
 local defaultSettings = {
   global = {
 	-- verify which variables need to be stored to previous use
-	limitZone = false,
-	limitMissing = false,
+	limitZone = true,
+	limitMissing = true,
 	addFindersWaypoints = false,
 	addRichiesWaypoints = false
   }
@@ -132,11 +132,11 @@ function eventHandler(frame, event, ...)
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" then -- reload the configurations from previous sessions
 		if FindersAndRichiesHelper.settings.global.addFindersWaypoints then
-			FindersAndRichiesHelper:Print('processing waypoints to Finders')
+			--FindersAndRichiesHelper:Print('processing waypoints to Finders')
 			FindersAndRichiesHelper:SetAchievementWaypoints(FindersAndRichiesHelper.settings.global.limitZone, FindersAndRichiesHelper.settings.global.limitMissing, richiesOfPandaria)
 		end
 		if FindersAndRichiesHelper.settings.global.addRichiesWaypoints then 
-			FindersAndRichiesHelper:Print('processing waypoints to Richies')
+			--FindersAndRichiesHelper:Print('processing waypoints to Richies')
 			FindersAndRichiesHelper:SetAchievementWaypoints(FindersAndRichiesHelper.settings.global.limitZone, FindersAndRichiesHelper.settings.global.limitMissing, findersKeepers)
 		end
 	end
@@ -150,23 +150,41 @@ end
 	self:RegisterChatCommand("findersandrichieshelper", "SlashCommand")
 	self:RegisterChatCommand("frh", "SlashCommand")
 
-	self.settings = LibStub("AceDB-3.0"):New("FRH_Settings", defaultSettings, true)
+	self.settings = LibStub("AceDB-3.0"):New("FRH_Settings", defaultSettings)
   
 	if updaterFrame == nil then
 		--updaterFrame = CreateFrame("frame")
-		
-		
-		
 		--InterfaceOptions_AddCategory(updaterFrame)
 		local AceConfig = LibStub("AceConfig-3.0")
 		AceConfig:RegisterOptionsTable("Finders And Richies Helper (frh)", function () return self:InterfaceOptions() end)
 		updaterFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Richies Helper (frh)")
+		updaterFrame.default = function() self:SetDefaultOptions() end
 		updaterFrame:SetScript("OnEvent", eventHandler)
 		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-		
 		updaterFrame:Show()
 	end
+end
+
+function FindersAndRichiesHelper:SetDefaultOptions() 
+  self.settings.global.limitMissing = true
+  self.settings.global.limitZone = true
+  self.settings.global.addFindersWaypoints = false
+  self.settings.global.addRichiesWaypoints = false
+  FindersAndRichiesHelper:ProcessOptions()
+end
+
+function FindersAndRichiesHelper:ProcessOptions()
+  FindersAndRichiesHelper:ClearNpcs();
+  FindersAndRichiesHelper:ClearWaypoints();
+  if self.settings.global.addFindersWaypoints then
+	self:Print('processing waypoints to Finders')
+	FindersAndRichiesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richiesOfPandaria)
+  end
+  if self.settings.global.addRichiesWaypoints then
+	self:Print('processing waypoints to Richies')
+	FindersAndRichiesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, findersKeepers)
+  end
 end
 
 function FindersAndRichiesHelper:PrintUsage()
@@ -267,25 +285,13 @@ function FindersAndRichiesHelper:SlashCommand(command)
     FindersAndRichiesHelper:PrintUsage()
   end
 
-  if addFindersWaypoints then
-	self:Print('processing waypoints to Finders')
-	FindersAndRichiesHelper:SetAchievementWaypoints(limitZone, limitMissing, richiesOfPandaria)
-  end
-  if addRichiesWaypoints then
-	self:Print('processing waypoints to Richies')
-	FindersAndRichiesHelper:SetAchievementWaypoints(limitZone, limitMissing, findersKeepers)
-  end
-  if clearWaypoints then
-	FindersAndRichiesHelper:ClearNpcs();
-	FindersAndRichiesHelper:ClearWaypoints();
-  end
-  
-  
   --store actual configuration
   self.settings.global.addFindersWaypoints = addFindersWaypoints
   self.settings.global.addRichiesWaypoints = addRichiesWaypoints
   self.settings.global.limitZone = limitZone
   self.settings.global.limitMissing = limitMissing
+  
+  FindersAndRichiesHelper:ProcessOptions();
   
 end
 
@@ -296,64 +302,46 @@ function FindersAndRichiesHelper:SetAchievementWaypoints(limitZone, limitMissing
 	--self:Print("set finders keepers waypoints : limitZone = " .. limitZone .. " limitMissing=" .. limitMissing)
 	for k, a in pairs(achievementCriteriaSet) do
 		if limitZone and zoneName == GetMapNameByID(a.map) then
-			if limitMissing then
-				if( IsQuestFlaggedCompleted(a.qid)) then
-					self:Print("adding waypoint to " .. a.desc .. " failed because you have already found it")
-				else
-					self:Print("adding waypoint to " .. a.desc)
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-				end
-			else
-				if( IsQuestFlaggedCompleted(a.qid)) then
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. ' (Already found)')
-					--check if npc
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-				else
-					self:Print("adding waypoint to " .. a.desc)
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-					--check if npc
-				end
-			end
+			FindersAndRichiesHelper:ProcessAchievementCriteria(a, limitMissing)
 		elseif limitZone == false then
-			if limitMissing then
-				if(IsQuestFlaggedCompleted(a.qid)) then
-					self:Print("adding waypoint to " .. a.desc .. " failed because you have already found it")
-				else
-					self:Print("adding waypoint to " .. a.desc)
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-					--check if npc
-				end
-			else
-				if(IsQuestFlaggedCompleted(a.qid)) then
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. ' (Already found)')
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-					--check if npc
-				else
-					self:Print("adding waypoint to " .. a.desc)
-					FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
-					if (a.npc ~= nil) then
-						FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
-					end
-					--check if npc
-				end
-			end
+			FindersAndRichiesHelper:ProcessAchievementCriteria(a, limitMissing)
 		end
 	end
-	
-	
+end
+
+function FindersAndRichiesHelper:ProcessAchievementCriteria(criteria, limitMissing)
+	if limitMissing then -- if limit missing then dont add waypoints for already found treaasures
+		if(IsQuestFlaggedCompleted(a.qid)) then -- have to do this way because nil is not false
+			-- self:Print("adding waypoint to " .. a.desc .. " failed because you have already found it")
+			-- nop
+		else
+			if (a.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name)
+				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+			else
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+			end
+			--check if npc
+		end
+	else
+		if(IsQuestFlaggedCompleted(a.qid)) then
+			if (a.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name .. '|cffff1111(Already found)')
+				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+			else
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+			end
+			--check if npc
+		else
+			if (a.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name)
+				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+			else
+				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+			end
+			--check if npc
+		end
+	end
 end
 
 --adds a Npc in NPCScan case it is installed
@@ -413,24 +401,12 @@ end
 
 
 function FindersAndRichiesHelper:OnEnable()
-  -- Called when the addon is enabled
-  --[[
-  if not updaterFrame then
-    --[===[@debug@
-    LorewalkersHelper:Print('CreateFrame: LorewalkersHelperUpdaterFrame')
-    --@end-debug@]===]
-    updaterFrame = CreateFrame("frame")
-    updaterFrame:SetScript("OnEvent", function (self, event, ...)
-										self:Print("event received " .. event)
-									  end)
-    updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-    updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-  end
-  updaterFrame:Show()
-  ]]--
+  FindersAndRichiesHelper:ProcessOptions()
 end
 
 function FindersAndRichiesHelper:OnDisable()
+  FindersAndRichiesHelper:ClearWaypoints()
+  FindersAndRichiesHelper:ClearNcps()
   if updaterFrame then
     updaterFrame:Hide()
     updaterFrame:SetParent(nil)
@@ -439,103 +415,6 @@ function FindersAndRichiesHelper:OnDisable()
 end
 -- LDB
 
-local LDBIcon = LDB and LibStub("LibDBIcon-1.0", true)
-
--- local LibQTip = LibStub('LibQTip-1.0')
-local LDB = LibStub("LibDataBroker-1.1"):NewDataObject("FindersAndRichiesHelper",
-{
-  type = "data source",
-  label = "Finders and Richies Helper",
-  text = "Finders and Richies Helper",
-  -- icon = "Interface\\Icons\\Ability_mount_cloudmount",
-  icon = "Interface\\Icons\\achievement_faction_lorewalkers", --temporary icon until I find how to use this functionality
-  OnClick = function(clickedFrame, button)
-    -- Click to add waypoints to missing criteria in current zone. (default)
-    -- Shift-Click to add waypoints to missing criteria in Pandaria.
-    -- Alt-Click to add waypoints to all criteria in current zone.
-    -- Alt-Shift-Click to add waypoints to all criteria in Pandaria.
-    if button == "LeftButton" then
-      -- LorewalkersHelper:SetWaypoints(limitZone, limitMissing)
-	  self:Print('Testing 1 LDB addon')
-      -- LorewalkersHelper:SetWaypoints(not IsShiftKeyDown(), not IsAltKeyDown())
-    elseif button == "RightButton" then
-		self:Print('Testing 2 LDB addon')
-      -- LorewalkersHelper:ToggleMoveHintFrame()
-    end
-  end,
-});
-
-function LDB:OnTooltipShow()
-  local zoneName, zoneId, counts, i, a, c
-  self:AddLine("Lorewalkers Helper")
-
-  self:AddLine("Missing achievements criteria in current zone")
-
-  zoneId = -1
-  zoneName = GetZoneText()
-  counts = {}
-  for i, a in pairs(achiMap) do
-    for i, c in pairs(a[2].p) do
-      if not select(3, GetAchievementCriteriaInfoByID(a[1], c.id)) then
-        if counts[c.m] then
-          counts[c.m] = counts[c.m] + 1
-        else
-          counts[c.m] = 1
-        end
-        if zoneName == GetMapNameByID(c.m) then
-          zoneId = c.m -- store it for later use ^^
-          self:AddLine("|cffff0000" ..
-                       select(1, GetAchievementCriteriaInfoByID(a[1], c.id)) ..
-                       "|r")
-        end
-      end
-    end
-  end
-
-  if zoneId >= 0 and not counts[zoneId]  then
-    self:AddLine("Nothing missing in current zone!")
-  end
-
-  self:AddLine(" ")
-  self:AddLine("Missing criteria in other zones")
-
-  for i, c in pairs(counts) do
-    if i ~= zoneId then
-      if not c then
-        self:AddLine(GetMapNameByID(i) ..
-                     ": |cff00ff00" ..
-                     c ..
-                     "|r")
-      else
-        self:AddLine(GetMapNameByID(i) ..
-                     ": |cffff0000" ..
-                     c ..
-                     "|r")
-      end
-    end
-  end
-
-  self:AddLine(" ")
-  -- colors are Alpha Red Green Blue
-  self:AddLine("|cffed55aaClick|r: " .. "add waypoints to missing criteria in current zone")
-  self:AddLine("|cffed55aaShift-Click|r: " .. "add waypoints to missing criteria in all Pandaria zones")
-  self:AddLine("|cffed55aaAlt-Click|r: " .. "add waypoints to every criteria in current zone")
-  self:AddLine("|cffed55aaAlt-Shift-Click|r: " .. "add waypoints to every criteria across Pandaria")
-  self:AddLine("|cffed55aaRightClick|r: " .. "lock/unlock info panel")
-
-end
-
-function LDB:OnEnter()
-  GameTooltip:SetOwner(self, "ANCHOR_NONE")
-  GameTooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
-  GameTooltip:ClearLines()
-  LDB.OnTooltipShow(GameTooltip)
-  GameTooltip:Show()
-end
-
-function LDB:OnLeave()
-  GameTooltip:Hide()
-end
 
 function FindersAndRichiesHelper:InterfaceOptions()
 	local texSize = 20
@@ -553,52 +432,56 @@ function FindersAndRichiesHelper:InterfaceOptions()
 				type = "group",
 				inline = true,
 				order = 1,
-				get = function(info) return self.Print("getting value of " .. info) end,
-				set = function(info, val) self.Print("Setting " .. info .. " to " .. val) end,
 				args = {
 					enable = {
-						name = "Enable\n", -- newline for spacing reasons
-						type = "toogle",
-						order = 0
-					},
-					zone = {
-						name = "Zone only",
+						name = "Enable\n",
 						type = "toggle",
-						--width = "half",
-						order = 1,
-					},
-					missing = {
-						name = "Missing only",
-						type = "toogle",
-						width = "half",
-						order = 2,
+						desc = "Enable/Disable tracking for Finders Keepers",
+						get = function(info) return self.settings.global.addFindersWaypoints end,
+						set = function(info, val) self.settings.global.addFindersWaypoints = val; FindersAndRichiesHelper:ProcessOptions() end,
+						order = 0
 					}
 				}
 			},
 			richiesOfPandaria = {
 				icon = "Interface\\Icons\\achievement_faction_lorewalkers",
-				name = "Finders Keepers",
+				name = "Richies of Pandaria",
 				type = "group",
 				inline = true,
 				order = 2,
-				get = function(info) return self.Print("getting value of " .. info) end,
-				set = function(info, val) self.Print("Setting " .. info .. " to " .. val) end,
 				args = {
 					enable = {
-						name = "Enable\n", -- newline for spacing reasons
-						type = "toogle",
-						order = 0
-					},
-					zone = {
-						name = "Zone only",
+						name = "Enable", 
 						type = "toggle",
-						--width = "half",
+						desc = "Enable/Disable tracking for Richies of Pandaria",
+						get = function(info) return self.settings.global.addRichiesWaypoints end,
+						set = function(info, val) self.settings.global.addRichiesWaypoints = val; FindersAndRichiesHelper:ProcessOptions() end,
+						order = 0
+					}
+				}
+			},
+			trackingOptions = {
+				name = "Tracking Options",
+				type = "group",
+				order = 3,
+				inline = true,
+				args = {
+					zone = {
+						name = "Zone Limitation",
+						type = "select",
+						values = {"Zone Only", "All Zones"},
+						desc = "Tracks only waypoints for the current zone",
+						get = function(info) if self.settings.global.limitZone then return 1 else return 2 end end,
+						set = function(info, val) if val == 1 then self.settings.global.limitZone = true else self.settings.global.limitZone = false end FindersAndRichiesHelper:ProcessOptions() end,
 						order = 1,
 					},
 					missing = {
-						name = "Missing only",
-						type = "toogle",
-						width = "half",
+						name = "Tracked Treasures",
+						type = "select",
+						values = {"Missing Only", "All Treasues"},
+						desc = "Tracks only missing treasures",
+						get = function(info) if self.settings.global.limitMissing then return 1; else return 2 end end,
+						set = function(info, val) self.Print("set " .. val) if val == 1 then self.settings.global.limitMissing = true else self.settings.global.limitMissing = false end FindersAndRichiesHelper:ProcessOptions() end,
 						order = 2,
 					}
 				}
