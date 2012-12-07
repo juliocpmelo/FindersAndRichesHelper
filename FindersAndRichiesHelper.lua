@@ -116,17 +116,19 @@ local currentTrackedNpcs = {}
 --called when the player changes the map or when he logs in the game
 function eventHandler(frame, event, ...)
 	--update map every change if show mode is enabled.
+	-- TODO: add achievement track or quest track to remove waypoints when a item is found
+	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
 	if (event == "ZONE_CHANGED_NEW_AREA") then
 		if FindersAndRichiesHelper.settings.global.limitZone then -- remove the waypoints from previous area and add for the new one
-			FindersAndRichiesHelper:Print('clear npcs and waypoints')
+			--FindersAndRichiesHelper:Print('clear npcs and waypoints')
 			FindersAndRichiesHelper:ClearWaypoints()
 			FindersAndRichiesHelper:ClearNpcs()
 			if FindersAndRichiesHelper.settings.global.addFindersWaypoints then
-				FindersAndRichiesHelper:Print('processing waypoints to Finders')
+				--FindersAndRichiesHelper:Print('processing waypoints to Finders')
 				FindersAndRichiesHelper:SetAchievementWaypoints(FindersAndRichiesHelper.settings.global.limitZone, FindersAndRichiesHelper.settings.global.limitMissing, richiesOfPandaria)
 			end
 			if FindersAndRichiesHelper.settings.global.addRichiesWaypoints then 
-				FindersAndRichiesHelper:Print('processing waypoints to Richies')
+				--FindersAndRichiesHelper:Print('processing waypoints to Richies')
 				FindersAndRichiesHelper:SetAchievementWaypoints(FindersAndRichiesHelper.settings.global.limitZone, FindersAndRichiesHelper.settings.global.limitMissing, findersKeepers)
 			end
 		end
@@ -139,7 +141,12 @@ function eventHandler(frame, event, ...)
 			--FindersAndRichiesHelper:Print('processing waypoints to Richies')
 			FindersAndRichiesHelper:SetAchievementWaypoints(FindersAndRichiesHelper.settings.global.limitZone, FindersAndRichiesHelper.settings.global.limitMissing, findersKeepers)
 		end
+	elseif event == "PLAYER_LEAVING_WORLD" then -- remove waypoints from tomtom
+		FindersAndRichiesHelper:ClearWaypoints();
+		FindersAndRichiesHelper:ClearNpcs();
 	end
+	--QUEST_WATCH_UPDATE
+	--PLAYER_LEAVING_WORLD
 	
 end
 
@@ -162,6 +169,7 @@ end
 		updaterFrame:SetScript("OnEvent", eventHandler)
 		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+		updaterFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 		updaterFrame:Show()
 	end
 end
@@ -178,11 +186,11 @@ function FindersAndRichiesHelper:ProcessOptions()
   FindersAndRichiesHelper:ClearNpcs();
   FindersAndRichiesHelper:ClearWaypoints();
   if self.settings.global.addFindersWaypoints then
-	self:Print('processing waypoints to Finders')
+	--self:Print('processing waypoints to Finders')
 	FindersAndRichiesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richiesOfPandaria)
   end
   if self.settings.global.addRichiesWaypoints then
-	self:Print('processing waypoints to Richies')
+	--self:Print('processing waypoints to Richies')
 	FindersAndRichiesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, findersKeepers)
   end
 end
@@ -206,7 +214,8 @@ end
 
 function FindersAndRichiesHelper:SlashCommand(command)
   local limitZone, limitMissing, distance
-  -- commands: all (everything everywhere), all zone (all in current zone), missing (missing in current zone, default), all missing (missing in every zone)
+  
+  
   addFindersWaypoints = false
   addRichiesWaypoints = false
   limitMissing = false
@@ -245,40 +254,40 @@ function FindersAndRichiesHelper:SlashCommand(command)
 	addFindersWaypoints = true
 	limitMissing = true
    elseif command:match"^%s*clear%s*$" then
-    self:Print('clearing all waypoints')
+    --self:Print('clearing all waypoints')
 	clearWaypoints = true
   -- tracker only for the Finders Keepers Achievement
   elseif command:match"^%s*finders%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
-	self:Print('finders all zone')
+	--self:Print('finders all zone')
 	limitZone = true
 	addFindersWaypoints = true
   elseif command:match"^%s*finders%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
-	self:Print('finders missing zone')
+	--self:Print('finders missing zone')
 	limitZone = true
 	limitMissing = true
 	addFindersWaypoints = true
   elseif command:match"^%s*finders%s+all%s*$" then -- markers in all maps, but including already found items
-	self:Print('finders all')
+	---self:Print('finders all')
 	addFindersWaypoints = true
   elseif command:match"^%s*finders%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
-	self:Print('finders all missing')
+	--self:Print('finders all missing')
 	limitMissing = true
 	addFindersWaypoints = true
   -- tracker only for the Richies of Pandaria Achievement
   elseif command:match"^%s*richies%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
-	self:Print('richies all zone')
+	--self:Print('richies all zone')
 	limitZone = true
 	addRichiesWaypoints = true
   elseif command:match"^%s*richies%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
-	self:Print('richies missing zone')
+	--self:Print('richies missing zone')
 	limitZone = true
 	limitMissing = true
 	addRichiesWaypoints = true
   elseif command:match"^%s*richies%s+all%s*$" then -- markers in all maps, but including already found items
-	self:Print('richies all')
+	--self:Print('richies all')
 	addRichiesWaypoints = true
   elseif command:match"^%s*richies%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
-	self:Print('richies all')
+	--self:Print('richies all')
 	addRichiesWaypoints = true
 	limitMissing = true
   else
@@ -311,33 +320,33 @@ end
 
 function FindersAndRichiesHelper:ProcessAchievementCriteria(criteria, limitMissing)
 	if limitMissing then -- if limit missing then dont add waypoints for already found treaasures
-		if(IsQuestFlaggedCompleted(a.qid)) then -- have to do this way because nil is not false
-			-- self:Print("adding waypoint to " .. a.desc .. " failed because you have already found it")
+		if(IsQuestFlaggedCompleted(criteria.qid)) then -- have to do this way because nil is not false
+			-- self:Print("adding waypoint to " .. criteria.desc .. " failed because you have already found it")
 			-- nop
 		else
-			if (a.npc ~= nil) then
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name)
-				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+			if (criteria.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name)
+				FindersAndRichiesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
 			end
 			--check if npc
 		end
 	else
-		if(IsQuestFlaggedCompleted(a.qid)) then
-			if (a.npc ~= nil) then
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name .. '|cffff1111(Already found)')
-				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+		if(IsQuestFlaggedCompleted(criteria.qid)) then
+			if (criteria.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name .. '|cffff1111(Already found)')
+				FindersAndRichiesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
 			end
 			--check if npc
 		else
-			if (a.npc ~= nil) then
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc .. '|cffffff00Npc: |cffffa500' .. a.npc.name)
-				FindersAndRichiesHelper:AddNpc(a.npc.id, a.map, a.npc.name)
+			if (criteria.npc ~= nil) then
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name)
+				FindersAndRichiesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichiesHelper:AddWaypoint(a.map, a.pos.f or nil, a.pos.x / 100, a.pos.y / 100, a.desc)
+				FindersAndRichiesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
 			end
 			--check if npc
 		end
@@ -347,18 +356,19 @@ end
 --adds a Npc in NPCScan case it is installed
 function FindersAndRichiesHelper:AddNpc(npcId, map, npcName)
 	if _NPCScan and _NPCScan.NPCAdd then
-		self:Print('adding npc ' .. npcName .. ' id ' .. npcId)
-		_NPCScan.NPCAdd(npcId, npcName, map)
+		--self:Print('adding npc ' .. npcName .. ' id ' .. npcId)
+		_NPCScan.NPCAdd(npcId, npcName, GetMapNameByID(map))
 	else
 		-- cant add npc name because npc scan isn't installed
-		self:Print('Can\'t add npc ' .. npcName .. ' because NPCScan is not installed')
+		--nop
+		--self:Print('Can\'t add npc ' .. npcName .. ' because NPCScan is not installed')
 	end
 	currentTrackedNpcs[table.getn(currentTrackedNpcs)+1] = npcId
 end
 
 --removes all current tracked achievement npcs
 function FindersAndRichiesHelper:ClearNpcs()
-	self:Print("removing " .. table.getn(currentTrackedNpcs) .. " npcs ")
+	--self:Print("removing " .. table.getn(currentTrackedNpcs) .. " npcs ")
 	for k, npcId in pairs(currentTrackedNpcs) do
 		if _NPCScan and _NPCScan.NPCAdd then
 			_NPCScan.NPCRemove(npcId)
@@ -382,12 +392,12 @@ function FindersAndRichiesHelper:AddWaypoint(map, floorNum, x, y, title)
     self:Print(s)
   end
   currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
-  self:Print("added " .. table.getn(currentWayPoints) .. " waypoints ")
+  --self:Print("added " .. table.getn(currentWayPoints) .. " waypoints ")
 end
 
 --removes all currently tracked waypoints
 function FindersAndRichiesHelper:ClearWaypoints()
-	self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
+	--self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
 	for k, wayPoint in pairs(currentWayPoints) do
 		if TomTom and TomTom.RemoveWaypoint then
 			TomTom:RemoveWaypoint(wayPoint)
@@ -401,6 +411,7 @@ end
 
 
 function FindersAndRichiesHelper:OnEnable()
+  --FindersAndRichiesHelper:Print("processing options " .. tostring(self.settings.global.limitZone) .. "," .. tostring(self.settings.global.limitMissing) .. "," .. tostring(self.settings.global.addFindersWaypoints) .. "," .. tostring(self.settings.global.addRichiesWaypoints) )
   FindersAndRichiesHelper:ProcessOptions()
 end
 
@@ -420,6 +431,7 @@ function FindersAndRichiesHelper:InterfaceOptions()
 	local texSize = 20
 	local canBeTank, canBeHealer, canBeDamager = UnitGetAvailableRoles("player")
 	local greyTint = {155, 155, 155}
+	--TODO list of all gotten/missing treasures
 	return {
 		name = addonName,
 		type = "group",
@@ -481,7 +493,7 @@ function FindersAndRichiesHelper:InterfaceOptions()
 						values = {"Missing Only", "All Treasues"},
 						desc = "Tracks only missing treasures",
 						get = function(info) if self.settings.global.limitMissing then return 1; else return 2 end end,
-						set = function(info, val) self.Print("set " .. val) if val == 1 then self.settings.global.limitMissing = true else self.settings.global.limitMissing = false end FindersAndRichiesHelper:ProcessOptions() end,
+						set = function(info, val) if val == 1 then self.settings.global.limitMissing = true else self.settings.global.limitMissing = false end FindersAndRichiesHelper:ProcessOptions() end,
 						order = 2,
 					}
 				}
