@@ -9,7 +9,7 @@ debug = true
 --
 local L
 
-local Astrolabe = DongleStub("Astrolabe-1.0")
+--local Astrolabe = DongleStub("Astrolabe-1.0")
 
 FindersAndRichesHelper = LibStub("AceAddon-3.0"):NewAddon("FindersAndRichesHelper", "AceConsole-3.0")
 
@@ -23,11 +23,13 @@ local defaultSettings = {
 	limitZone = true,
 	limitMissing = true,
 	addFindersWaypoints = true,
-	addRichesWaypoints = true
+	addRichesWaypoints = true,
+	showMinimapIcon = true
   }
 }
 
 local updaterFrame = nil
+local minimapIcon = nil
 
 -- riches of pandaria locations according wowhead (12/03/12)						 
 local richesOfPandaria	={ --Jade Forest items
@@ -144,6 +146,8 @@ function eventHandler(frame, event, ...)
 	
 end
 
+
+--mini
  
  
  function FindersAndRichesHelper:OnInitialize()
@@ -165,14 +169,23 @@ end
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		updaterFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 		updaterFrame:Show()
+		
+		local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
+																								type = "data source",
+																								text = "Finders and Riches Helper",
+																								icon = "Interface\\Icons\\INV_Chest_Cloth_17",
+																								OnClick = function() FindersAndRichesHelper:MinimapButtonOptions() end,
+																								})
+		minimapIcon = LibStub("LibDBIcon-1.0")
+		minimapIcon:Register("Finders And Riches Helper (frh)", findersandRichesHelperLDB, self.settings.showMinimapIcon)
 	end
 end
 
 function FindersAndRichesHelper:SetDefaultOptions() 
   self.settings.global.limitMissing = true
   self.settings.global.limitZone = true
-  self.settings.global.addFindersWaypoints = false
-  self.settings.global.addRichesWaypoints = false
+  self.settings.global.addFindersWaypoints = true
+  self.settings.global.addRichesWaypoints = true
   FindersAndRichesHelper:ProcessOptions()
 end
 
@@ -498,6 +511,13 @@ function FindersAndRichesHelper:InterfaceOptions()
 		}
 	}
 end
+
+
+function FindersAndRichesHelper:MinimapButtonOptions()
+	self:Print("testing minimap click button")
+end
+-- Minimap options
+
 
 
 

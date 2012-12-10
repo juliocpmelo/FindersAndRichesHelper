@@ -1,3 +1,4 @@
+## Interface: 50100
 ## Title: Finders and Riches Helper
 ## Notes: Helps the player to get the Finders Keepers and Riches of Pandaria achievements.
 ## Author: Julio Melo
@@ -20,6 +21,8 @@ libs\AceLocale-3.0\AceLocale-3.0.lua
 libs\AceEvent-3.0\AceEvent-3.0.lua
 #@end-no-lib-strip@
 libs\Astrolabe\Load.xml
-libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibDataBroker-1-1\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
 
 FindersAndRichesHelper.lua
