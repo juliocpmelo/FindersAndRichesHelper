@@ -22,8 +22,8 @@ local defaultSettings = {
 	-- verify which variables need to be stored to previous use
 	limitZone = true,
 	limitMissing = true,
-	addFindersWaypoints = false,
-	addRichesWaypoints = false
+	addFindersWaypoints = true,
+	addRichesWaypoints = true
   }
 }
 
@@ -121,26 +121,20 @@ function eventHandler(frame, event, ...)
 	if (event == "ZONE_CHANGED_NEW_AREA") then
 		if FindersAndRichesHelper.settings.global.limitZone then -- remove the waypoints from previous area and add for the new one
 			--FindersAndRichesHelper:Print('clear npcs and waypoints')
-			FindersAndRichesHelper:ClearWaypoints()
-			FindersAndRichesHelper:ClearNpcs()
-			if FindersAndRichesHelper.settings.global.addFindersWaypoints then
+			FindersAndRichesHelper:ProcessOptions()
+			--FindersAndRichesHelper:ClearWaypoints()
+			--FindersAndRichesHelper:ClearNpcs()
+			--if FindersAndRichesHelper.settings.global.addFindersWaypoints then
 				--FindersAndRichesHelper:Print('processing waypoints to Finders')
-				FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, richesOfPandaria)
-			end
-			if FindersAndRichesHelper.settings.global.addRichesWaypoints then 
+				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, richesOfPandaria)
+			--end
+			--if FindersAndRichesHelper.settings.global.addRichesWaypoints then 
 				--FindersAndRichesHelper:Print('processing waypoints to Riches')
-				FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, findersKeepers)
-			end
+				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, findersKeepers)
+			--end
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" then -- reload the configurations from previous sessions
-		if FindersAndRichesHelper.settings.global.addFindersWaypoints then
-			--FindersAndRichesHelper:Print('processing waypoints to Finders')
-			FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, richesOfPandaria)
-		end
-		if FindersAndRichesHelper.settings.global.addRichesWaypoints then 
-			--FindersAndRichesHelper:Print('processing waypoints to Riches')
-			FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, findersKeepers)
-		end
+		FindersAndRichesHelper:ProcessOptions()
 	elseif event == "PLAYER_LEAVING_WORLD" then -- remove waypoints from tomtom
 		FindersAndRichesHelper:ClearWaypoints();
 		FindersAndRichesHelper:ClearNpcs();
@@ -192,6 +186,9 @@ function FindersAndRichesHelper:ProcessOptions()
   if self.settings.global.addRichesWaypoints then
 	--self:Print('processing waypoints to Riches')
 	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richesOfPandaria)
+  end
+  if self.settings.global.addFindersWaypoints or self.settings.global.addRichesWaypoints then
+	TomTom:SetClosestWaypoint()
   end
 end
 
