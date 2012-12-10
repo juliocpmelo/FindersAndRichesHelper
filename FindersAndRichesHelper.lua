@@ -187,11 +187,11 @@ function FindersAndRichesHelper:ProcessOptions()
   FindersAndRichesHelper:ClearWaypoints();
   if self.settings.global.addFindersWaypoints then
 	--self:Print('processing waypoints to Finders')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richesOfPandaria)
+	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, findersKeepers)
   end
   if self.settings.global.addRichesWaypoints then
 	--self:Print('processing waypoints to Riches')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, findersKeepers)
+	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richesOfPandaria)
   end
 end
 
