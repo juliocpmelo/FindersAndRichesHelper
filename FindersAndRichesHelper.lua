@@ -139,7 +139,54 @@ end
 
 
 --mini
+
+ -- creating test data structure
+ local Test1_Data = {
+   ["level1_test_1"] = {
+     [1] = { ["name"] = "sublevel 1"; },
+     [2] = {	["name"] = "sublevel 2"; },
+   },
+   ["level1_test_2"] = {
+     [1] = {	["name"] = "sublevel A"; },
+     [2] = {	["name"] = "sublevel B"; },
+   }
+ }
  
+ function Test1_DropDown_Initialize(self,level)
+   level = level or 1;
+   if (level == 1) then
+     for key, subarray in pairs(Test1_Data) do
+       local info = UIDropDownMenu_CreateInfo();
+       info.hasArrow = true; -- creates submenu
+       info.notCheckable = true;
+       info.text = key;
+       info.value = {
+         ["Level1_Key"] = key;
+       };
+       UIDropDownMenu_AddButton(info, level);
+     end -- for key, subarray
+   end -- if level 1
+
+   if (level == 2) then
+     -- getting values of first menu
+     local Level1_Key = UIDROPDOWNMENU_MENU_VALUE["Level1_Key"];
+     subarray = Test1_Data[Level1_Key];
+     for key, subsubarray in pairs(subarray) do
+       local info = UIDropDownMenu_CreateInfo();
+       info.hasArrow = false; -- no submenues this time
+       info.notCheckable = true;
+       info.text = subsubarray["name"];
+       -- use info.func to set a function to be called at "click"
+       info.value = {
+         ["Level1_Key"] = Level1_Key;
+         ["Sublevel_Key"] = key;
+       };
+       UIDropDownMenu_AddButton(info, level);
+     end -- for key,subsubarray
+   end -- if level 2
+ end -- function Test1_DropDown_Initialize
+ 
+ menuFrame = nil
  
  function FindersAndRichesHelper:OnInitialize()
 	-- Called when the addon is loaded
@@ -162,15 +209,36 @@ end
 		updaterFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 		updaterFrame:Show()
 		
-		--[[local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
+		
+		local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
 																								type = "data source",
 																								text = "Finders and Riches Helper",
 																								icon = "Interface\\Icons\\INV_Chest_Cloth_17",
-																								OnClick = function() FindersAndRichesHelper:MinimapButtonOptions() end,
+																								OnClick =	function() 
+																												local menu=	{ 	{ text = "Select an Option", isTitle = true, notCheckable=true},
+																																{ text = "Option 1", keepShownOnClick= true, func = function() print("You've chosen option 1"); end },
+																																{ text = "Option 2", keepShownOnClick= true, func = function() print("You've chosen option 2"); end },
+																																{ text = "More Options", notCheckable=true, keepShownOnClick= true, hasArrow = true,
+																																	menuList = {
+																																		{ text = "Option 3", keepShownOnClick= true, func = function() print("You've chosen option 3"); end }
+																																	} 
+																																}
+																															}
+																												menuFrame:SetPoint("Center", UIParent, "Center")
+																												EasyMenu(menu, menuFrame, menuFrame, 0 , 0, "MENU")  
+																											 end,
 																								})
 		minimapIcon = LibStub("LibDBIcon-1.0")
 		minimapIcon:Register("Finders And Riches Helper (frh)", findersandRichesHelperLDB, self.settings.showMinimapIcon)
-		]]--
+		
+		
+		menuFrame = CreateFrame("Frame", "ExampleMenuFrame", UIParent, "UIDropDownMenuTemplate")
+
+		-- Make the menu appear at the cursor: 
+		--EasyMenu(menu, menuFrame, "cursor", 0 , 0, "MENU");
+		-- Or make the menu appear at the frame:
+		
+	
 	end
 end
 
