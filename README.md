@@ -17,3 +17,4 @@ Todo List
 - Check the possibility of adding waypoints inside of dugeons (not in the world map)
 - Fix the issue with the Saurok Stone Tablet
 - Try to update tomtom arrow to closest waypoint
+- Fix the icons
