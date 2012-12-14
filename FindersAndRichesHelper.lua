@@ -31,80 +31,70 @@ local defaultSettings = {
 local updaterFrame = nil
 local minimapIcon = nil
 
+-- TODO use the floor param to mark the correct position of indor items
 -- riches of pandaria locations according wowhead (12/03/12)						 
 local richesOfPandaria	={ --Jade Forest items
-						 {map=806, qid = 31400 , desc = 'Ancient Pandaren Tea Pot', pos = { x=26.22 , y=32.35}},
-						 {map=806, qid = 31401 , desc = 'Lucky Pandaren Coin', pos = { x=31.96  , y=27.75}},
-						 {map=806, qid = 31404 , desc = 'Pandaren Ritual Stone', pos = { x=23.49 , y=35.05}},
-						 {map=806, qid = 31396 , desc = 'Ship\'s Locker', pos = { x=51.22 , y=100.00}},
+						 {map=806, qid = 31400 , desc = 'Ancient Pandaren Tea Pot', positions = {{ x=26.22 , y=32.35}}},
+						 {map=806, qid = 31401 , desc = 'Lucky Pandaren Coin', positions = {{ x=31.96  , y=27.75}}},
+						 {map=806, qid = 31404 , desc = 'Pandaren Ritual Stone', positions = {{ x=23.49 , y=35.05}}},
+						 {map=806, qid = 31396 , desc = 'Ship\'s Locker', extraNote='Inside the lower deck of the sunken boat', positions = {{ x=51.22 , y=100.00}}},
 						  --Valley of the Four Winds items
-						 {map=807, qid = 31405 , desc = 'Virmen Treasure Cache', pos = { x=23.71 , y=28.33}},
-						 {map=807, qid = 31408 , desc = 'Saurok Stone Tablet', pos = { x=75.1 , y=55.1}},
+						 {map=807, qid = 31405 , desc = 'Virmen Treasure Cache', submapEntrance={note='Cave entrance', positions = {{x=23.19, y=30.75}}, map=807}, positions = {{ x=23.71 , y=28.33}}},
+						 {map=807, qid = 31408 , desc = 'Saurok Stone Tablet', submapEntrance={note='Cave entrance', positions = {{x=71, y=9}}, map=857}, positions = {{ x=75.1 , y=55.1}}},
 						  -- The Veiled Stair Items
-						 {map=873, qid = 31428 , desc = 'The Hammer of Folly', pos = { x=74.93 , y=76.48}},
+						 {map=873, qid = 31428 , desc = 'The Hammer of Folly', positions = {{ x=74.93 , y=76.48}}},
 						  -- Kun-Lai Summit
-						 {map=809, qid = 31420 , desc = 'Ancient Mogu Tablet', pos = { x=63.94 , y=49.84}},
-						 {map=809, qid = 31414 , desc = 'Hozen Treasure Cache', pos = { x=50.36 , y=61.77}},
-						 {map=809, qid = 31418 , desc = 'Lost Adventurer\'s Belongings', pos = { x=36.70 , y=79.70}},
-						 {map=809, qid = 31419 , desc = 'Rikktik\'s Tiny Chest', pos = { x=52.57 , y=51.54}},
-						 {map=809, qid = 31416 , desc = 'Statue of Xuen', pos = { x=72.01 , y=33.96}},
-						 {map=809, qid = 31415 , desc = 'Stolen Sprite Treasure', pos = { x=41.67 , y=44.12}},
-						 {map=809, qid = 31422 , desc = 'Terracotta Head', pos = { x=59.24 , y=73.03}},
+						 {map=809, qid = 31420 , desc = 'Ancient Mogu Tablet', submapEntrance={note='Path of Conquerors entrance', positions = {{x=63.94, y=49.84}}, map=809}, positions = {{ x=63.94 , y=49.84}}},
+						 {map=809, qid = 31414 , desc = 'Hozen Treasure Cache', submapEntrance={note='Cave entrance', positions = {{x=0, y=0}}, map=809}, positions = {{ x=50.36 , y=61.77}}},
+						 {map=809, qid = 31418 , desc = 'Lost Adventurer\'s Belongings', positions = {{ x=36.70 , y=79.70}}},
+						 {map=809, qid = 31419 , desc = 'Rikktik\'s Tiny Chest', positions = {{ x=52.57 , y=51.54}}},
+						 {map=809, qid = 31416 , desc = 'Statue of Xuen', positions = {{ x=72.01 , y=33.96}}},
+						 {map=809, qid = 31415 , desc = 'Stolen Sprite Treasure', submapEntrance={note='Cave entrance', positions = {{x=59.5, y=52.9}}, map=809}, positions = {{ x=41.67 , y=44.12}}},
+						 {map=809, qid = 31422 , desc = 'Terracotta Head', positions = {{ x=59.24 , y=73.03}}},
 						  -- Townlong Steppes
-						 {map=810, qid = 31427 , desc = 'Abandoned Crate of Goods', pos = { x=62.82 , y=34.05}},
-						 {map=810, qid = 31426 , desc = 'Amber Encased Moth', pos = { x=65.83 , y=86.08}},
-						 {map=810, qid = 31423 , desc = 'Fragment of Dread', pos = { x=48.49 , y=89.46}},
-						 {map=810, qid = 31424 , desc = 'Hardened Sap of Kri\'vess', pos = { x=52.84 , y=56.17}},
+						 {map=810, qid = 31427 , desc = 'Abandoned Crate of Goods', positions = {{ x=62.82 , y=34.05}}},
+						 {map=810, qid = 31426 , desc = 'Amber Encased Moth', positions = {{ x=65.83 , y=86.08}}},
+						 --todo check the locations of this item
+						 {map=810, qid = 31423 , desc = 'Fragment of Dread', submapEntrance={note='Catacombs entrance', positions = {{x=32.6, y=61.8}}, map=810}, positions = {{ x=33.81 , y=61.80}}},
+						 {map=810, qid = 31424 , desc = 'Hardened Sap of Kri\'vess', extraNote='Various spawn points arround the Kri\'vess Tree', positions = {{ x=52.84 , y=56.17}}},
 						 }
 
 -- finders keepers locations according wowhead (12/03/12)
--- TODO check possibility to use the npc scan to track the npcs
 local findersKeepers	={ --Jade Forest items
-						 {map=806, qid = 31402 , desc = 'Ancient Jinyu Staff spot 1', pos = { x=47.10 , y=67.40}},
-						 {map=806, qid = 31402 , desc = 'Ancient Jinyu Staff spot 2', pos = { x=46.20 , y=71.20}},
-						 {map=806, qid = 31402 , desc = 'Ancient Jinyu Staff spot 3', pos = { x=44.90 , y=64.60}},
-						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick spot 1', pos = { x=46.10 , y=29.10}},
-						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick spot 2', pos = { x=44.10 , y=27.00}},
-						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick spot 3', pos = { x=43.80 , y=30.70}},
-						 {map=806, qid = 31403 , desc = 'Hammer of Ten Thunders spot 1', pos = { x=41.80 , y=17.60}},
-						 {map=806, qid = 31403 , desc = 'Hammer of Ten Thunders spot 2', pos = { x=43.00 , y=11.60}},
-						 {map=806, qid = 31307 , desc = 'Jade Infused Blade', pos = { x=39.26 , y=46.65}, npc = {id='64272', name='Jade Warrior Statue'}}, -- npc scan id 64272 Jade Warrior Statue
-						 {map=806, qid = 31397 , desc = 'Wodin\'s Mantid Shanker', pos = { x=39.00 , y=7.00}},
+						 {map=806, qid = 31402 , desc = 'Ancient Jinyu Staff', positions = {{ x=47.10 , y=67.40}, { x=46.20 , y=71.20}, { x=44.90 , y=64.60}}},
+						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick',  extraNote='Inside Greenstone Quarry', submapEntrance={note='Greenstone Quarry entrance and first spot', positions = {{x=46.1, y=29.1}}, map=806}, positions = {{ x=46.10 , y=29.10} , { x=44.10 , y=27.00}, {x=43.80 , y=30.70}}},
+						 {map=806, qid = 31403 , desc = 'Hammer of Ten Thunders', positions = {{ x=41.80 , y=17.60}, { x=43.00 , y=11.60}}},
+						 {map=806, qid = 31307 , desc = 'Jade Infused Blade', positions = {{ x=39.26 , y=46.65}}, npc = {id='64272', name='Jade Warrior Statue'}}, -- npc scan id 64272 Jade Warrior Statue
+						 {map=806, qid = 31397 , desc = 'Wodin\'s Mantid Shanker', positions = {{ x=39.00 , y=7.00}}},
 						  --Valley of the Four Winds items
-						 {map=807, qid = 31284 , desc = 'Ancient Pandaren Fishing Charm', pos = { x=45.40 , y=38.20}, npc = {id=64004, name='Ghostly Pandaren Fisherman'}}, -- npc scan id 64004 Ghostly Pandaren Fisherman
-						 {map=807, qid = 31292 , desc = 'Ancient Pandaren Woodcutter', pos = { x=45.40 , y=38.20}, npc = {id=64191, name='Ghostly Pandaren Craftsman'}}, -- npc scan id 64191 Ghostly Pandaren Craftsman
-						 {map=807, qid = 31406 , desc = 'Cache of Pilfered Goods', pos = { x=43.50 , y=37.40}},
-						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master spot 1', pos = { x=15.40 , y=29.10}},
-						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master spot 2', pos = { x=17.50 , y=35.70}},
-						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master spot 3', pos = { x=19.10 , y=37.90}},
-						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master spot 4', pos = { x=15.00 , y=33.70}},
-						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master spot 5', pos = { x=19.00 , y=42.50}},
+						 {map=807, qid = 31284 , desc = 'Ancient Pandaren Fishing Charm', positions = {{ x=45.40 , y=38.20}}, npc = {id=64004, name='Ghostly Pandaren Fisherman'}}, -- npc scan id 64004 Ghostly Pandaren Fisherman
+						 {map=807, qid = 31292 , desc = 'Ancient Pandaren Woodcutter', positions = {{ x=45.40 , y=38.20}}, npc = {id=64191, name='Ghostly Pandaren Craftsman'}}, -- npc scan id 64191 Ghostly Pandaren Craftsman
+						 {map=807, qid = 31406 , desc = 'Cache of Pilfered Goods', submapEntrance={note='Cave entrance', positions = {{x=43,y=35}}, map=807}, positions = {{ x=43.50 , y=37.40}}},
+						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master', positions = {{ x=15.40 , y=29.10}, { x=17.50 , y=35.70}, { x=19.10 , y=37.90}, { x=15.00 , y=33.70}, { x=19.00 , y=42.50}}},
 						  -- Krasarang Wilds
-						 {map=857, qid = 31410 , desc = 'Equipment Locker', pos = { x=42.00 , y=91.00}},
-						 {map=857, qid = 31409 , desc = 'Pandaren Fishing Spear', pos = { x=50.80 , y=49.30}},
-						 {map=857, qid = 31411 , desc = 'Recipe: Banana Infused Rum', pos = { x=52.30 , y=88.00}},
+						 {map=857, qid = 31410 , desc = 'Equipment Locker', extraNote='On the lowest deck of the ship', positions = {{ x=42.00 , y=91.00}}},
+						 {map=857, qid = 31409 , desc = 'Pandaren Fishing Spear', positions = {{ x=50.80 , y=49.30}}},
+						 {map=857, qid = 31411 , desc = 'Recipe: Banana Infused Rum', extraNote='Search for a Barrel of Banana Infused Rum', positions = {{ x=52.30 , y=88.00}}},
 						  -- Kun-Lai Summit
-						 {map=809, qid = 31413 , desc = 'Hozen Warrior Spear', pos = { x=52.80 , y=71.30}},
-						 {map=809, qid = 31304 , desc = 'Kafa Press', pos = { x=37.37 , y=77.84}},
-						 {map=809, qid = 31412 , desc = 'Sprite\'s Cloth Chest', pos = { x=74.70 , y=74.90}},
-						 {map=809, qid = 31421 , desc = 'Sturdy Yaungol Spear spot 1', pos = { x=71.20 , y=62.60}},
-						 {map=809, qid = 31421 , desc = 'Sturdy Yaungol Spear spot 2', pos = { x=70.00 , y=63.80}},
-						 {map=809, qid = 31417 , desc = 'Tablet of Ren Yun', pos = { x=44.7 , y=52.4}},
+						 {map=809, qid = 31413 , desc = 'Hozen Warrior Spear', submapEntrance={note='The Deeper entrance', positions = {{x=52.8, y=71.3}}, map=809}, positions = {{ x=52.80 , y=71.30}}},
+						 {map=809, qid = 31304 , desc = 'Kafa Press', submapEntrance={note='Cave entrance', positions = {{x=35.19, y=76.35}}, map=809}, positions = {{ x=37.37 , y=77.84}}, npc={id=64227, name='Frozen Trail Packer'}},
+						 {map=809, qid = 31412 , desc = 'Sprite\'s Cloth Chest', submapEntrance={note='Prankster\'s Hollow entrance', positions = {{x=73.0, y=73.5}}, map=809},  positions = {{ x=74.70 , y=74.90}}},
+						 {map=809, qid = 31421 , desc = 'Sturdy Yaungol Spear', positions = {{ x=71.20 , y=62.60}, { x=70.00 , y=63.80}}},
+						 {map=809, qid = 31417 , desc = 'Tablet of Ren Yun', positions = {{ x=44.7 , y=52.4}}},
 						  -- Townlong Steppes
-						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', pos = { x=66.30 , y=44.70}},
-						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', pos = { x=66.80 , y=48.00}},
+						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', positions = {{ x=66.30 , y=44.70}}},
+						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', positions = {{ x=66.80 , y=48.00}}},
 						  -- Dread Wastes
-						 {map=858, qid = 31438 , desc = 'Blade of the Poisoned Mind', pos = { x=28.00 , y=42.00}},
-						 {map=858, qid = 31433 , desc = 'Blade of the Prime', pos = { x=25.70 , y=54.40}},
-						 {map=858, qid = 31436 , desc = 'Bloodsoaked Chitin Fragment', pos = { x=25.70 , y=54.40}},
-						 {map=858, qid = 31435 , desc = 'Dissector\'s Staff of Mutation', pos = { x=30.20 , y=90.80}},
-						 {map=858, qid = 31431 , desc = 'Lucid Amulet of the Agile Mind', pos = { x=32.00 , y=30.00}},
-						 {map=858, qid = 31430 , desc = 'Malik\'s Stalwart Spear', pos = { x=48.00 , y=30.00}},
-						 {map=858, qid = 31432 , desc = 'Manipulator\'s Talisman spot 1', pos = { x=42.00 , y=62.20}, npc = {id='65552', name='Glinting Rapana Whelk'}}, -- npc scan id 65552 Glinting Rapana Whelk
-						 {map=858, qid = 31432 , desc = 'Manipulator\'s Talisman spot 2', pos = { x=42.20 , y=63.60}},
-						 {map=858, qid = 31432 , desc = 'Manipulator\'s Talisman spot 3', pos = { x=41.60 , y=64.60}},
-						 {map=858, qid = 31434 , desc = 'Swarming Cleaver of Ka\'roz', pos = { x=56.80 , y=77.60}},
-						 {map=858, qid = 31666 , desc = 'Wind-Reaver\'s Dagger of Quick Strikes', pos = { x=71.80 , y=36.10}},
+						 {map=858, qid = 31438 , desc = 'Blade of the Poisoned Mind', positions = {{ x=28.00 , y=42.00}}},
+						 {map=858, qid = 31433 , desc = 'Blade of the Prime', submapEntrance={note='Cave entrance', positions = {{x=66.7, y=63.7}}, map=858}, positions = {{ x=25.70 , y=54.40}}},
+						 {map=858, qid = 31436 , desc = 'Bloodsoaked Chitin Fragment', submapEntrance={note='Cave entrance', positions = {{x=25.7, y=54.4}}, map=858}, positions = {{ x=25.70 , y=54.40}}},
+						 {map=858, qid = 31435 , desc = 'Dissector\'s Staff of Mutation', positions = {{ x=30.20 , y=90.80}}},
+						 {map=858, qid = 31431 , desc = 'Lucid Amulet of the Agile Mind', positions = {{ x=32.00 , y=30.00}}},
+						 {map=858, qid = 31430 , desc = 'Malik\'s Stalwart Spear', positions = {{ x=48.00 , y=30.00}}},
+						 {map=858, qid = 31432 , desc = 'Manipulator\'s Talisman spot 1', positions = {{ x=42.00 , y=62.20}, { x=42.20 , y=63.60}, { x=41.60 , y=64.60} }, npc = {id='65552', name='Glinting Rapana Whelk'}}, -- npc scan id 65552 Glinting Rapana Whelk
+						 {map=858, qid = 31434 , desc = 'Swarming Cleaver of Ka\'roz', extraNote='At the bottom of the sea', positions = {{ x=56.80 , y=77.60}}},
+						 {map=858, qid = 31437 , desc = 'Swarmkeeper\'s Medallion', positions = {{ x=54.2, y=56.4}}},
+						 {map=858, qid = 31666 , desc = 'Wind-Reaver\'s Dagger of Quick Strikes', positions = {{ x=71.80 , y=36.10}}},
 						 }
 
 
@@ -120,6 +110,7 @@ function eventHandler(frame, event, ...)
 	--update map every change if show mode is enabled.
 	-- TODO: add achievement track or quest track to remove waypoints when a item is found
 	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
+	FindersAndRichesHelper:Print('event fired ' .. event)
 	if (event == "ZONE_CHANGED_NEW_AREA") then
 		if FindersAndRichesHelper.settings.global.limitZone then -- remove the waypoints from previous area and add for the new one
 			--FindersAndRichesHelper:Print('clear npcs and waypoints')
@@ -165,12 +156,13 @@ end
 		updaterFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Riches Helper (frh)")
 		updaterFrame.default = function() self:SetDefaultOptions() end
 		updaterFrame:SetScript("OnEvent", eventHandler)
+		--updaterFrame:SetScript("OnUpdate", updateHandler)
 		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		updaterFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 		updaterFrame:Show()
 		
-		local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
+		--[[local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
 																								type = "data source",
 																								text = "Finders and Riches Helper",
 																								icon = "Interface\\Icons\\INV_Chest_Cloth_17",
@@ -178,6 +170,7 @@ end
 																								})
 		minimapIcon = LibStub("LibDBIcon-1.0")
 		minimapIcon:Register("Finders And Riches Helper (frh)", findersandRichesHelperLDB, self.settings.showMinimapIcon)
+		]]--
 	end
 end
 
@@ -315,12 +308,16 @@ function FindersAndRichesHelper:SlashCommand(command)
 end
 
 function FindersAndRichesHelper:SetAchievementWaypoints(limitZone, limitMissing, achievementCriteriaSet)
-	local doAdd
 	local zoneName = GetZoneText()
 	
-	--self:Print("set finders keepers waypoints : limitZone = " .. limitZone .. " limitMissing=" .. limitMissing)
+	
 	for k, a in pairs(achievementCriteriaSet) do
-		if limitZone and zoneName == GetMapNameByID(a.map) then
+		self:Print("set waypoint to " .. a.desc)
+		if a.submapEntrance ~= nil then
+			 self:Print("set submap entrance in map" .. a.submapEntrance.map)
+		end
+		if limitZone and zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
+		
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
 		elseif limitZone == false then
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
@@ -328,37 +325,60 @@ function FindersAndRichesHelper:SetAchievementWaypoints(limitZone, limitMissing,
 	end
 end
 
+function FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, isSubmap)
+	description = criteria.desc
+	if isSubmap then
+		description = description .. '\n|cffffffff' .. criteria.submapEntrance.note
+	else
+		if IsQuestFlaggedCompleted(criteria.qid) then
+			description = description .. '|cffff1111(Already found)'
+		end
+		if criteria.extraNote ~= nil then
+			description = description .. '\n|cffffffff' .. criteria.extraNote
+		end
+		if criteria.npc ~= nil then
+			description = description .. '\n|cffffffffHave to interact with |cffffff00Npc: |cffffa500' .. criteria.npc.name
+		end
+	end
+	return description
+end
+
+-- process the given achievement criteria, adding waypoints 
 function FindersAndRichesHelper:ProcessAchievementCriteria(criteria, limitMissing)
 	if limitMissing then -- if limit missing then dont add waypoints for already found treaasures
 		if(IsQuestFlaggedCompleted(criteria.qid)) then -- have to do this way because nil is not false
 			-- self:Print("adding waypoint to " .. criteria.desc .. " failed because you have already found it")
 			-- nop
 		else
-			if (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name)
+			if (criteria.submapEntrance ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+			elseif (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 			end
-			--check if npc
 		end
 	else
 		if(IsQuestFlaggedCompleted(criteria.qid)) then
-			if (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name .. '|cffff1111(Already found)')
+			if (criteria.submapEntrance ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+			elseif (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 			end
-			--check if npc
 		else
-			if (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc .. '\n|cffffff00Npc: |cffffa500' .. criteria.npc.name)
+			if (criteria.submapEntrance ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+				--FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true))
+			elseif (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, criteria.desc)
+				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
 			end
-			--check if npc
 		end
 	end
 end
@@ -376,6 +396,7 @@ function FindersAndRichesHelper:AddNpc(npcId, map, npcName)
 	currentTrackedNpcs[table.getn(currentTrackedNpcs)+1] = npcId
 end
 
+
 --removes all current tracked achievement npcs
 function FindersAndRichesHelper:ClearNpcs()
 	--self:Print("removing " .. table.getn(currentTrackedNpcs) .. " npcs ")
@@ -387,23 +408,47 @@ function FindersAndRichesHelper:ClearNpcs()
 	currentTrackedNpcs = {}
 end
 
+local function waypointArrivalCallback(event, uid, range, distance, lastdistance)
+	
+	-- if a cave waypoint is hit, add new waypoints related to it
+	--FindersAndRichesHelper:Print('cave entrance arrived ' .. uid.submapWaypoints ~= nil )
+	if uid.private.submapWaypoints ~= nil then
+		--FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.submapWaypoints))
+		FindersAndRichesHelper:AddWaypoint(uid.private.mapId, uid.private.submapWaypoints, uid.private.submapTitle)
+	end
+	TomTom:SetClosestWaypoint()
+end
 
 --adds a waypoint in TomTom case it is installed
-function FindersAndRichesHelper:AddWaypoint(map, floorNum, x, y, title)
-  local s
-  if TomTom and TomTom.AddMFWaypoint then
-    wayPointId = TomTom:AddMFWaypoint(map, floorNum or nil, x, y, {title = title})
-  elseif TomTomLite and TomTomLite.AddWaypoint then
-    wayPointId = TomTomLite.AddWaypoint(map, floorNum or nil, x, y, {title = title})
-  else
-    s = GetMapNameByID(map)
-    -- show floor?
-    s = s .. " (" .. x*100 .. ", " .. y*100 .. "): " .. title
-    self:Print(s)
+function FindersAndRichesHelper:AddWaypoint(map, mainWaypoints, title, submapId, submapWaypoints, submapTitle)
+  for k, pos in pairs (mainWaypoints) do
+	  if TomTom and TomTom.AddMFWaypoint then
+		wayPointId = TomTom:AddMFWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title} )
+	  elseif TomTomLite and TomTomLite.AddWaypoint then
+		wayPointId = TomTomLite.AddWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title})
+	  else
+		s = GetMapNameByID(map)
+		-- show floor?
+		s = s .. " (" .. pos.x*100 .. ", " .. pos.y*100 .. "): " .. title
+		self:Print(s)
+	  end
+	  if wayPointId ~= nil then
+		  wayPointId.callbacks.distance[wayPointId.arrivaldistance] = waypointArrivalCallback
+		  currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
+		  if submapId~=nil then
+			  wayPointId.private = {}
+			  wayPointId.private.submapWaypoints = submapWaypoints
+			  wayPointId.private.mapId = submapId
+			  wayPointId.private.submapTitle = submapTitle
+		  end
+	  end
   end
-  currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
+ 
+  --[[]]--
   --self:Print("added " .. table.getn(currentWayPoints) .. " waypoints ")
 end
+
+
 
 --removes all currently tracked waypoints
 function FindersAndRichesHelper:ClearWaypoints()
@@ -411,6 +456,7 @@ function FindersAndRichesHelper:ClearWaypoints()
 	for k, wayPoint in pairs(currentWayPoints) do
 		if TomTom and TomTom.RemoveWaypoint then
 			TomTom:RemoveWaypoint(wayPoint)
+			self:Print('removing waypoint waypoint to ' .. wayPoint.title)
 		elseif TomTomLite and TomTomLite.RemoveWaypoint then
 			TomTomLite.RemoveWaypoint(wayPoint)
 		end
@@ -562,4 +608,58 @@ function FindersAndRichesHelper:SetRichesOfPandariaWaypoints(limitZone, limitMis
 		end
 	end
 end
+
+
+-- workarround into minimap buttons 
+VuhDoMinimap = {
+
+	["Create"] = function(self, someModSettings, someInitSettings)
+
+		if (VuhDoMinimapButton ~= nil) then
+			return;
+		end
+
+		local tFrame = CreateFrame("Button", "VuhDoMinimapButton", Minimap);
+
+		tFrame:SetWidth(31);
+		tFrame:SetHeight(31);
+		tFrame:SetFrameStrata("LOW");
+		tFrame:SetToplevel(true);
+		tFrame:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight");
+		tFrame:SetPoint("TOPLEFT", Minimap, "TOPLEFT");
+
+		local tIcon = tFrame:CreateTexture("VuhDoMinimapButtonIcon", "BACKGROUND");
+		tIcon:SetTexture(VUHDO_STANDARD_ICON);
+		tIcon:SetWidth(20);
+		tIcon:SetHeight(20);
+		tIcon:SetPoint("TOPLEFT", tFrame, "TOPLEFT", 7, -5);
+
+		local tOverlay = tFrame:CreateTexture("VuhDoMinimapButtonOverlay", "OVERLAY");
+		tOverlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder");
+		tOverlay:SetWidth(53);
+		tOverlay:SetHeight(53);
+		tOverlay:SetPoint("TOPLEFT", tFrame, "TOPLEFT")
+
+		tFrame:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+		tFrame:SetScript("OnClick", self.OnClick);
+
+		tFrame:SetScript("OnMouseDown", self.OnMouseDown);
+		tFrame:SetScript("OnMouseUp", self.OnMouseUp);
+		tFrame:SetScript("OnEnter", self.OnEnter);
+		tFrame:SetScript("OnLeave", self.OnLeave);
+
+		tFrame:RegisterForDrag("LeftButton");
+		tFrame:SetScript("OnDragStart", self.OnDragStart);
+		tFrame:SetScript("OnDragStop", self.OnDragStop);
+
+		if (someModSettings["position"] == nil) then
+			someModSettings["drag"] = someInitSettings["drag"];
+			someModSettings["position"] = someInitSettings["position"];
+		end
+
+		tFrame["modSettings"] = someModSettings;
+		self:Move();
+	end,
+
+
 ]]--
