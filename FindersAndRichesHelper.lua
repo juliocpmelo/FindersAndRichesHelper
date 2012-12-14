@@ -567,12 +567,28 @@ function FindersAndRichesHelper:InterfaceOptions()
 						order = 2,
 					}
 				}
+			},
+			minimapIconOptions = {
+				name = "Minimap Icon",
+				type = "group",
+				inline = true,
+				order = 4,
+				args = {
+					enable = {
+						name = "Enable", 
+						type = "toggle",
+						desc = "Enable/Disable minimap icon from FRH",
+						get = function(info) return self.settings.global.showMinimapIcon end,
+						set = function(info, val) self.settings.global.showMinimapIcon = val  if not val then minimapIcon:Hide("FRH_ldbIcon") else minimapIcon:Show("FRH_ldbIcon") end end,
+						order = 0
+					}
+				}
 			}
 		}
 	}
 end
 
-local FINDERS_KEEPERS_INDEX=2
+local FINDERS	_KEEPERS_INDEX=2
 local RICHES_OF_PANDARIA_INDEX=3
 local ZONE_LIMITATION_INDEX=4
 local ZONE_LIMITATION_ZONE_ONLY_INDEX = 1
