@@ -140,51 +140,6 @@ end
 
 --mini
 
- -- creating test data structure
- local Test1_Data = {
-   ["level1_test_1"] = {
-     [1] = { ["name"] = "sublevel 1"; },
-     [2] = {	["name"] = "sublevel 2"; },
-   },
-   ["level1_test_2"] = {
-     [1] = {	["name"] = "sublevel A"; },
-     [2] = {	["name"] = "sublevel B"; },
-   }
- }
- 
- function Test1_DropDown_Initialize(self,level)
-   level = level or 1;
-   if (level == 1) then
-     for key, subarray in pairs(Test1_Data) do
-       local info = UIDropDownMenu_CreateInfo();
-       info.hasArrow = true; -- creates submenu
-       info.notCheckable = true;
-       info.text = key;
-       info.value = {
-         ["Level1_Key"] = key;
-       };
-       UIDropDownMenu_AddButton(info, level);
-     end -- for key, subarray
-   end -- if level 1
-
-   if (level == 2) then
-     -- getting values of first menu
-     local Level1_Key = UIDROPDOWNMENU_MENU_VALUE["Level1_Key"];
-     subarray = Test1_Data[Level1_Key];
-     for key, subsubarray in pairs(subarray) do
-       local info = UIDropDownMenu_CreateInfo();
-       info.hasArrow = false; -- no submenues this time
-       info.notCheckable = true;
-       info.text = subsubarray["name"];
-       -- use info.func to set a function to be called at "click"
-       info.value = {
-         ["Level1_Key"] = Level1_Key;
-         ["Sublevel_Key"] = key;
-       };
-       UIDropDownMenu_AddButton(info, level);
-     end -- for key,subsubarray
-   end -- if level 2
- end -- function Test1_DropDown_Initialize
  
  menuFrame = nil
  
@@ -214,25 +169,16 @@ end
 																								type = "data source",
 																								text = "Finders and Riches Helper",
 																								icon = "Interface\\Icons\\INV_Chest_Cloth_17",
-																								OnClick =	function() 
-																												local menu=	{ 	{ text = "Select an Option", isTitle = true, notCheckable=true},
-																																{ text = "Option 1", keepShownOnClick= true, func = function() print("You've chosen option 1"); end },
-																																{ text = "Option 2", keepShownOnClick= true, func = function() print("You've chosen option 2"); end },
-																																{ text = "More Options", notCheckable=true, keepShownOnClick= true, hasArrow = true,
-																																	menuList = {
-																																		{ text = "Option 3", keepShownOnClick= true, func = function() print("You've chosen option 3"); end }
-																																	} 
-																																}
-																															}
-																												menuFrame:SetPoint("Center", UIParent, "Center")
-																												EasyMenu(menu, menuFrame, menuFrame, 0 , 0, "MENU")  
+																								OnClick =	function(clickedframe, button) 
+																												if button == "LeftButton" then
+																													FindersAndRichesHelper:MinimapButtonOptions(clickedframe)
+																												end
 																											 end,
 																								})
 		minimapIcon = LibStub("LibDBIcon-1.0")
-		minimapIcon:Register("Finders And Riches Helper (frh)", findersandRichesHelperLDB, self.settings.showMinimapIcon)
+		minimapIcon:Register("FRH_ldbIcon", findersandRichesHelperLDB, self.settings.showMinimapIcon)
 		
 		
-		menuFrame = CreateFrame("Frame", "ExampleMenuFrame", UIParent, "UIDropDownMenuTemplate")
 
 		-- Make the menu appear at the cursor: 
 		--EasyMenu(menu, menuFrame, "cursor", 0 , 0, "MENU");
@@ -380,10 +326,10 @@ function FindersAndRichesHelper:SetAchievementWaypoints(limitZone, limitMissing,
 	
 	
 	for k, a in pairs(achievementCriteriaSet) do
-		self:Print("set waypoint to " .. a.desc)
-		if a.submapEntrance ~= nil then
-			 self:Print("set submap entrance in map" .. a.submapEntrance.map)
-		end
+		--self:Print("set waypoint to " .. a.desc)
+	--	if a.submapEntrance ~= nil then
+		--	 self:Print("set submap entrance in map" .. a.submapEntrance.map)
+	--	end
 		if limitZone and zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
 		
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
@@ -524,7 +470,7 @@ function FindersAndRichesHelper:ClearWaypoints()
 	for k, wayPoint in pairs(currentWayPoints) do
 		if TomTom and TomTom.RemoveWaypoint then
 			TomTom:RemoveWaypoint(wayPoint)
-			self:Print('removing waypoint waypoint to ' .. wayPoint.title)
+			--self:Print('removing waypoint waypoint to ' .. wayPoint.title)
 		elseif TomTomLite and TomTomLite.RemoveWaypoint then
 			TomTomLite.RemoveWaypoint(wayPoint)
 		end
@@ -626,9 +572,162 @@ function FindersAndRichesHelper:InterfaceOptions()
 	}
 end
 
+local FINDERS_KEEPERS_INDEX=2
+local RICHES_OF_PANDARIA_INDEX=3
+local ZONE_LIMITATION_INDEX=4
+local ZONE_LIMITATION_ZONE_ONLY_INDEX = 1
+local ZONE_LIMITATION_ALL_ZONES_INDEX = 2
+local TRACKED_TREASURES_INDEX=5
+local TRACKED_TREASURES_MISSING_ONLY_INDEX=1 
+local TRACKED_TREASURES_ALL_TREASURES_INDEX=2
+local HIDE_MINIMAP_INDEX=6
+local HIDE_MINIMAP_YES_INDEX=1
+local HIDE_MINIMAP_NO_INDEX=2
 
-function FindersAndRichesHelper:MinimapButtonOptions()
-	self:Print("testing minimap click button")
+
+-- ids used to refer the list internally
+local ZONE_LIMITATION_ZONE_ONLY_ID = 1
+local ZONE_LIMITATION_ALL_ZONES_ID = 2
+local TRACKED_TREASURES_MISSING_ONLY_ID=3
+local TRACKED_TREASURES_ALL_TREASURES_ID=4
+local TRACKED_TREASURES_ALL_TREASURES_ID=5
+local HIDE_MINIMAP_YES_ID=6
+local HIDE_MINIMAP_NO_ID=7
+
+local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
+			{ text = "Finders Keepers", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
+																			FindersAndRichesHelper.settings.global.addFindersWaypoints = checked
+																			FindersAndRichesHelper:ProcessOptions()
+																		end 
+			},
+			{ text = "Riches of Pandaria", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
+																				FindersAndRichesHelper.settings.global.addRichesWaypoints = checked
+																				FindersAndRichesHelper:ProcessOptions()
+																			end 
+			},
+			{ text = "Zone Limitation", notCheckable=true, keepShownOnClick= true, hasArrow = true,
+				menuList = {
+					{ text = "Zone Only", keepShownOnClick= true, value= ZONE_LIMITATION_ZONE_ONLY_ID, func = function(self, arg1, arg2, checked) 
+																			
+																			--print ('selecting value zone only' )
+																			
+																			if(not FindersAndRichesHelper.settings.global.limitZone) then -- in this case 11 is selected
+																				print ('selecting value zone only 1' )
+																				FindersAndRichesHelper.settings.global.limitZone = true
+																				
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID) --doesn't make any sence: the reverse order doesn't work
+																				
+																				
+																				FindersAndRichesHelper:ProcessOptions()
+																			else -- dont update in case it is already selected
+																				print ('selecting value zone only 2' )
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID)
+																			end
+																			
+																			
+																		 end 
+					},
+					{ text = "All Zones", keepShownOnClick= true, value= ZONE_LIMITATION_ALL_ZONES_ID, func = function(self, arg1, arg2, checked) 
+																			
+																			
+																			if(FindersAndRichesHelper.settings.global.limitZone) then -- in this case 11 is selected
+																				print ('selecting value all zones 1' )
+																				FindersAndRichesHelper.settings.global.limitZone = false
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID)
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
+																				FindersAndRichesHelper:ProcessOptions()
+																			elseif(not FindersAndRichesHelper.settings.global.limitZone) then -- dont update in case it is already selected
+																				print ('selecting value all zones 2' )
+																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
+																			end
+																			
+																		 end 
+					}
+				}
+			},
+			{text = "Tracked Treasures", notCheckable=true, keepShownOnClick= true, hasArrow = true,
+				menuList = {
+					{ text = "Missing Only", keepShownOnClick= true, value=TRACKED_TREASURES_MISSING_ONLY_ID, func = function(self, arg1, arg2, checked)
+																				if(not FindersAndRichesHelper.settings.global.limitMissing) then -- in this case 11 is selected
+																			
+																					FindersAndRichesHelper.settings.global.limitMissing = true
+																					
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
+																					
+																					FindersAndRichesHelper:ProcessOptions()
+																				elseif(FindersAndRichesHelper.settings.global.limitMissing) then -- dont update in case it is already selected
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
+																				end
+																				 
+																				
+																			end 
+					},
+					{ text = "All Treasures", keepShownOnClick= true, value=TRACKED_TREASURES_ALL_TREASURES_ID, func = function(self, arg1, arg2, checked) 
+																				if(FindersAndRichesHelper.settings.global.limitMissing) then -- in this case 11 is selected
+																			
+																					FindersAndRichesHelper.settings.global.limitMissing = false
+																					
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
+																					FindersAndRichesHelper:ProcessOptions()
+																				elseif(not FindersAndRichesHelper.settings.global.limitMissing) then -- dont update in case it is already selected
+																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
+																				end
+																			 end
+					}
+				}
+			},
+			{text="Hide Minimap Icon", notCheckable=true, keepShownOnClick= true, hasArrow = true, menuList = {
+					{ text = "Yes", value=HIDE_MINIMAP_YES_ID, func = function(self, arg1, arg2, checked)
+																		if(not FindersAndRichesHelper.settings.global.showMinimapIcon) then -- in this case 11 is selected
+																			FindersAndRichesHelper.settings.global.showMinimapIcon = true
+																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
+																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
+																			minimapIcon:Hide("FRH_ldbIcon")
+																		else -- dont update in case it is already selected
+																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
+																		end
+																	  end 
+					},
+					{ text = "No", keepShownOnClick= true, value=HIDE_MINIMAP_NO_ID, func = function(self, arg1, arg2, checked) 
+																				if(FindersAndRichesHelper.settings.global.showMinimapIcon) then -- in this case 11 is selected
+
+																					FindersAndRichesHelper.settings.global.showMinimapIcon = false
+																					UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
+																					UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
+																					minimapIcon:Show("FRH_ldbIcon")
+																				else -- dont update in case it is already selected
+																					UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
+																				end
+																			 end
+					}
+				}
+			},
+			{text= "Close", notCheckable=true}
+		   }
+function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
+	if menuFrame == nil then
+		menuFrame = CreateFrame("Frame", "ExampleMenuFrame", parentFrame, "UIDropDownMenuTemplate")
+	end
+		
+	
+	--set actual values
+	menu[FINDERS_KEEPERS_INDEX].checked = self.settings.global.addFindersWaypoints
+	menu[RICHES_OF_PANDARIA_INDEX].checked = self.settings.global.addRichesWaypoints
+
+	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ZONE_ONLY_INDEX].checked = self.settings.global.limitZone
+	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ALL_ZONES_INDEX].checked = not self.settings.global.limitZone
+	
+	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_MISSING_ONLY_INDEX].checked = self.settings.global.limitMissing
+	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_ALL_TREASURES_INDEX].checked = not self.settings.global.limitMissing
+	
+	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_YES_INDEX].checked = not self.settings.global.showMinimapIcon
+	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_NO_INDEX].checked = self.settings.global.showMinimapIcon
+	
+	menuFrame:SetPoint("Center", parentFrame, "Center")
+	EasyMenu(menu, menuFrame, menuFrame, 0 , 0, "MENU") 
 end
 -- Minimap options
 
