@@ -44,18 +44,18 @@ local richesOfPandaria	={ --Jade Forest items
 						  -- The Veiled Stair Items
 						 {map=873, qid = 31428 , desc = 'The Hammer of Folly', positions = {{ x=74.93 , y=76.48}}},
 						  -- Kun-Lai Summit
-						 {map=809, qid = 31420 , desc = 'Ancient Mogu Tablet', submapEntrance={note='Path of Conquerors entrance', positions = {{x=63.94, y=49.84}}, map=809}, positions = {{ x=63.94 , y=49.84}}},
-						 {map=809, qid = 31414 , desc = 'Hozen Treasure Cache', submapEntrance={note='Cave entrance', positions = {{x=0, y=0}}, map=809}, positions = {{ x=50.36 , y=61.77}}},
+						 {map=809, qid = 31420 , desc = 'Ancient Mogu Tablet', submapEntrance={note='Path of Conquerors entrance', positions = {{x=63.94, y=49.84}}, map=809}, positions = {{ x=64.00 , y=45.00}}},
+						 {map=809, qid = 31414 , desc = 'Hozen Treasure Cache', submapEntrance={note='Cave entrance', positions = {{x=50.3, y=61.8}}, map=809}, positions = {{ x=50.36 , y=61.77}}},
 						 {map=809, qid = 31418 , desc = 'Lost Adventurer\'s Belongings', positions = {{ x=36.70 , y=79.70}}},
 						 {map=809, qid = 31419 , desc = 'Rikktik\'s Tiny Chest', positions = {{ x=52.57 , y=51.54}}},
 						 {map=809, qid = 31416 , desc = 'Statue of Xuen', positions = {{ x=72.01 , y=33.96}}},
-						 {map=809, qid = 31415 , desc = 'Stolen Sprite Treasure', submapEntrance={note='Cave entrance', positions = {{x=59.5, y=52.9}}, map=809}, positions = {{ x=41.67 , y=44.12}}},
+						 {map=809, qid = 31415 , desc = 'Stolen Sprite Treasure', submapEntrance={note='Cave entrance', positions = {{x=59.5, y=52.9}}, map=809}, positions = {{ x=56.7 , y=48.9}}},
 						 {map=809, qid = 31422 , desc = 'Terracotta Head', positions = {{ x=59.24 , y=73.03}}},
 						  -- Townlong Steppes
 						 {map=810, qid = 31427 , desc = 'Abandoned Crate of Goods', positions = {{ x=62.82 , y=34.05}}},
 						 {map=810, qid = 31426 , desc = 'Amber Encased Moth', positions = {{ x=65.83 , y=86.08}}},
 						 --todo check the locations of this item
-						 {map=810, qid = 31423 , desc = 'Fragment of Dread', submapEntrance={note='Catacombs entrance', positions = {{x=32.6, y=61.8}}, map=810}, positions = {{ x=33.81 , y=61.80}}},
+						 {map=810, qid = 31423 , desc = 'Fragment of Dread', submapEntrance={note='Catacombs entrance', positions = {{x=32.6, y=61.8}}, map=810}, positions = {{ x=33.81 , y=61.80}, {x=35.3 ,y=62.9}, {x=36.6, y=61.2}, {x=36.4, y=58.7}}},
 						 {map=810, qid = 31424 , desc = 'Hardened Sap of Kri\'vess', extraNote='Various spawn points arround the Kri\'vess Tree', positions = {{ x=52.84 , y=56.17}}},
 						 }
 
@@ -76,8 +76,8 @@ local findersKeepers	={ --Jade Forest items
 						 {map=857, qid = 31409 , desc = 'Pandaren Fishing Spear', positions = {{ x=50.80 , y=49.30}}},
 						 {map=857, qid = 31411 , desc = 'Recipe: Banana Infused Rum', extraNote='Search for a Barrel of Banana Infused Rum', positions = {{ x=52.30 , y=88.00}}},
 						  -- Kun-Lai Summit
-						 {map=809, qid = 31413 , desc = 'Hozen Warrior Spear', submapEntrance={note='The Deeper entrance', positions = {{x=52.8, y=71.3}}, map=809}, positions = {{ x=52.80 , y=71.30}}},
-						 {map=809, qid = 31304 , desc = 'Kafa Press', submapEntrance={note='Cave entrance', positions = {{x=35.19, y=76.35}}, map=809}, positions = {{ x=37.37 , y=77.84}}, npc={id=64227, name='Frozen Trail Packer'}},
+						 {map=809, qid = 31413 , desc = 'Hozen Warrior Spear', submapEntrance={note='The Deeper entrance', positions = {{x=52.8, y=71.3}}, map=809}, positions = {{ x=51.50 , y=74.00}}},
+						 {map=809, qid = 31304 , desc = 'Kafa Press', submapEntrance={note='Cave entrance', positions = {{x=37.5, y=78.00}}, map=809}, positions = {{ x=37.37 , y=77.84}}, npc={id=64227, name='Frozen Trail Packer'}},
 						 {map=809, qid = 31412 , desc = 'Sprite\'s Cloth Chest', submapEntrance={note='Prankster\'s Hollow entrance', positions = {{x=73.0, y=73.5}}, map=809},  positions = {{ x=74.70 , y=74.90}}},
 						 {map=809, qid = 31421 , desc = 'Sturdy Yaungol Spear', positions = {{ x=71.20 , y=62.60}, { x=70.00 , y=63.80}}},
 						 {map=809, qid = 31417 , desc = 'Tablet of Ren Yun', positions = {{ x=44.7 , y=52.4}}},
@@ -86,8 +86,8 @@ local findersKeepers	={ --Jade Forest items
 						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', positions = {{ x=66.80 , y=48.00}}},
 						  -- Dread Wastes
 						 {map=858, qid = 31438 , desc = 'Blade of the Poisoned Mind', positions = {{ x=28.00 , y=42.00}}},
-						 {map=858, qid = 31433 , desc = 'Blade of the Prime', submapEntrance={note='Cave entrance', positions = {{x=66.7, y=63.7}}, map=858}, positions = {{ x=25.70 , y=54.40}}},
-						 {map=858, qid = 31436 , desc = 'Bloodsoaked Chitin Fragment', submapEntrance={note='Cave entrance', positions = {{x=25.7, y=54.4}}, map=858}, positions = {{ x=25.70 , y=54.40}}},
+						 {map=858, qid = 31433 , desc = 'Blade of the Prime', submapEntrance={note='Cave entrance', positions = {{x=66.7, y=63.7}}, map=858}, positions = {{ x=66.3 , y=66.2}}},
+						 {map=858, qid = 31436 , desc = 'Bloodsoaked Chitin Fragment', submapEntrance={note='Cave entrance', positions = {{x=25.7, y=54.4}}, map=858}, positions = {{ x=25.70 , y=50.30},  }},
 						 {map=858, qid = 31435 , desc = 'Dissector\'s Staff of Mutation', positions = {{ x=30.20 , y=90.80}}},
 						 {map=858, qid = 31431 , desc = 'Lucid Amulet of the Agile Mind', positions = {{ x=32.00 , y=30.00}}},
 						 {map=858, qid = 31430 , desc = 'Malik\'s Stalwart Spear', positions = {{ x=48.00 , y=30.00}}},
@@ -425,9 +425,9 @@ end
 local function waypointArrivalCallback(event, uid, range, distance, lastdistance)
 	
 	-- if a cave waypoint is hit, add new waypoints related to it
-	--FindersAndRichesHelper:Print('cave entrance arrived ' .. uid.submapWaypoints ~= nil )
-	if uid.private.submapWaypoints ~= nil then
-		--FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.submapWaypoints))
+	FindersAndRichesHelper:Print('cave entrance arrived ' )
+	if  uid.private ~= nil and uid.private.submapWaypoints ~= nil then
+		FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.private.submapWaypoints))
 		FindersAndRichesHelper:AddWaypoint(uid.private.mapId, uid.private.submapWaypoints, uid.private.submapTitle)
 	end
 	TomTom:SetClosestWaypoint()
@@ -588,7 +588,7 @@ function FindersAndRichesHelper:InterfaceOptions()
 	}
 end
 
-local FINDERS	_KEEPERS_INDEX=2
+local FINDERS_KEEPERS_INDEX=2
 local RICHES_OF_PANDARIA_INDEX=3
 local ZONE_LIMITATION_INDEX=4
 local ZONE_LIMITATION_ZONE_ONLY_INDEX = 1
