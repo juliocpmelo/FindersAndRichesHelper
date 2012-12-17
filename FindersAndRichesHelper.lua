@@ -18,15 +18,17 @@ local addonName = "Finders And Riches Helper (frh)"
 
 
 local defaultSettings = {
-  global = {
-	-- verify which variables need to be stored to previous use
-	limitZone = true,
-	limitMissing = true,
-	addFindersWaypoints = true,
-	addRichesWaypoints = true,
-	showMinimapIcon = true
-  }
+	profile = {
+			limitZone = true,
+			limitMissing = true,
+			addFindersWaypoints = true,
+			addRichesWaypoints = true,
+			minimapIconSettings = {
+				hide = false,
+			},
+		}
 }
+
 
 local updaterFrame = nil
 local minimapIcon = nil
@@ -110,20 +112,20 @@ function eventHandler(frame, event, ...)
 	--update map every change if show mode is enabled.
 	-- TODO: add achievement track or quest track to remove waypoints when a item is found
 	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
-	FindersAndRichesHelper:Print('event fired ' .. event)
+	--FindersAndRichesHelper:Print('event fired ' .. event)
 	if (event == "ZONE_CHANGED_NEW_AREA") then
-		if FindersAndRichesHelper.settings.global.limitZone then -- remove the waypoints from previous area and add for the new one
+		if FindersAndRichesHelper.settings.profile.limitZone then -- remove the waypoints from previous area and add for the new one
 			--FindersAndRichesHelper:Print('clear npcs and waypoints')
 			FindersAndRichesHelper:ProcessOptions()
 			--FindersAndRichesHelper:ClearWaypoints()
 			--FindersAndRichesHelper:ClearNpcs()
-			--if FindersAndRichesHelper.settings.global.addFindersWaypoints then
+			--if FindersAndRichesHelper.settings.profile.addFindersWaypoints then
 				--FindersAndRichesHelper:Print('processing waypoints to Finders')
-				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, richesOfPandaria)
+				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, richesOfPandaria)
 			--end
-			--if FindersAndRichesHelper.settings.global.addRichesWaypoints then 
+			--if FindersAndRichesHelper.settings.profile.addRichesWaypoints then 
 				--FindersAndRichesHelper:Print('processing waypoints to Riches')
-				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.global.limitZone, FindersAndRichesHelper.settings.global.limitMissing, findersKeepers)
+				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, findersKeepers)
 			--end
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" then -- reload the configurations from previous sessions
@@ -149,7 +151,6 @@ end
 	self:RegisterChatCommand("frh", "SlashCommand")
 
 	self.settings = LibStub("AceDB-3.0"):New("FRH_Settings", defaultSettings)
-  
 	if updaterFrame == nil then
 		--updaterFrame = CreateFrame("frame")
 		--InterfaceOptions_AddCategory(updaterFrame)
@@ -168,7 +169,7 @@ end
 		local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
 																								type = "data source",
 																								text = "Finders and Riches Helper",
-																								icon = "Interface\\Icons\\INV_Chest_Cloth_17",
+																								icon = "Interface\\Icons\\inv_misc_ornatebox",
 																								OnClick =	function(clickedframe, button) 
 																												if button == "LeftButton" then
 																													FindersAndRichesHelper:MinimapButtonOptions(clickedframe)
@@ -176,38 +177,33 @@ end
 																											 end,
 																								})
 		minimapIcon = LibStub("LibDBIcon-1.0")
-		minimapIcon:Register("FRH_ldbIcon", findersandRichesHelperLDB, self.settings.showMinimapIcon)
+		minimapIcon:Register("FRH_ldbIcon", findersandRichesHelperLDB, self.settings.profile.minimapIconSettings)
 		
-		
-
-		-- Make the menu appear at the cursor: 
-		--EasyMenu(menu, menuFrame, "cursor", 0 , 0, "MENU");
-		-- Or make the menu appear at the frame:
 		
 	
 	end
 end
 
 function FindersAndRichesHelper:SetDefaultOptions() 
-  self.settings.global.limitMissing = true
-  self.settings.global.limitZone = true
-  self.settings.global.addFindersWaypoints = true
-  self.settings.global.addRichesWaypoints = true
+  self.settings.profile.limitMissing = true
+  self.settings.profile.limitZone = true
+  self.settings.profile.addFindersWaypoints = true
+  self.settings.profile.addRichesWaypoints = true
   FindersAndRichesHelper:ProcessOptions()
 end
 
 function FindersAndRichesHelper:ProcessOptions()
   FindersAndRichesHelper:ClearNpcs();
   FindersAndRichesHelper:ClearWaypoints();
-  if self.settings.global.addFindersWaypoints then
+  if self.settings.profile.addFindersWaypoints then
 	--self:Print('processing waypoints to Finders')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, findersKeepers)
+	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, findersKeepers)
   end
-  if self.settings.global.addRichesWaypoints then
+  if self.settings.profile.addRichesWaypoints then
 	--self:Print('processing waypoints to Riches')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.global.limitZone, self.settings.global.limitMissing, richesOfPandaria)
+	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, richesOfPandaria)
   end
-  if self.settings.global.addFindersWaypoints or self.settings.global.addRichesWaypoints then
+  if self.settings.profile.addFindersWaypoints or self.settings.profile.addRichesWaypoints then
 	TomTom:SetClosestWaypoint()
   end
 end
@@ -235,8 +231,8 @@ function FindersAndRichesHelper:SlashCommand(command)
   
   addFindersWaypoints = false
   addRichesWaypoints = false
-  limitMissing = false
-  limitZone = false
+  limitMissing = true
+  limitZone = true
   clearWaypoints = false
   
   --debug mode for test only
@@ -312,10 +308,10 @@ function FindersAndRichesHelper:SlashCommand(command)
   end
 
   --store actual configuration
-  self.settings.global.addFindersWaypoints = addFindersWaypoints
-  self.settings.global.addRichesWaypoints = addRichesWaypoints
-  self.settings.global.limitZone = limitZone
-  self.settings.global.limitMissing = limitMissing
+  self.settings.profile.addFindersWaypoints = addFindersWaypoints
+  self.settings.profile.addRichesWaypoints = addRichesWaypoints
+  self.settings.profile.limitZone = limitZone
+  self.settings.profile.limitMissing = limitMissing
   
   FindersAndRichesHelper:ProcessOptions();
   
@@ -341,12 +337,12 @@ end
 
 function FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, isSubmap)
 	description = criteria.desc
+	if IsQuestFlaggedCompleted(criteria.qid) then
+		description = description .. '|cffff1111(Already found)'
+	end
 	if isSubmap then
 		description = description .. '\n|cffffffff' .. criteria.submapEntrance.note
 	else
-		if IsQuestFlaggedCompleted(criteria.qid) then
-			description = description .. '|cffff1111(Already found)'
-		end
 		if criteria.extraNote ~= nil then
 			description = description .. '\n|cffffffff' .. criteria.extraNote
 		end
@@ -425,9 +421,9 @@ end
 local function waypointArrivalCallback(event, uid, range, distance, lastdistance)
 	
 	-- if a cave waypoint is hit, add new waypoints related to it
-	FindersAndRichesHelper:Print('cave entrance arrived ' )
+	--FindersAndRichesHelper:Print('cave entrance arrived ' )
 	if  uid.private ~= nil and uid.private.submapWaypoints ~= nil then
-		FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.private.submapWaypoints))
+		--FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.private.submapWaypoints))
 		FindersAndRichesHelper:AddWaypoint(uid.private.mapId, uid.private.submapWaypoints, uid.private.submapTitle)
 	end
 	TomTom:SetClosestWaypoint()
@@ -481,7 +477,7 @@ end
 
 
 function FindersAndRichesHelper:OnEnable()
-  --FindersAndRichesHelper:Print("processing options " .. tostring(self.settings.global.limitZone) .. "," .. tostring(self.settings.global.limitMissing) .. "," .. tostring(self.settings.global.addFindersWaypoints) .. "," .. tostring(self.settings.global.addRichesWaypoints) )
+  --FindersAndRichesHelper:Print("processing options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
   FindersAndRichesHelper:ProcessOptions()
 end
 
@@ -505,12 +501,12 @@ function FindersAndRichesHelper:InterfaceOptions()
 	return {
 		name = addonName,
 		type = "group",
-		--get = function(info) return self.settings.global[] end,
-		--set = function(info, val) self.settings.global[info[#info]] = val end,
+		--get = function(info) return self.settings.profile[] end,
+		--set = function(info, val) self.settings.profile[info[#info]] = val end,
 		args = {
 			findersKeepersOptions = {
-				icon = "Interface\\Icons\\achievement_faction_lorewalkers",
-				name = "Finders Keepers",
+				icon = "Interface\\Icons\\inv_misc_ornatebox",
+				name = "Is Another Man's Treasure",
 				type = "group",
 				inline = true,
 				order = 1,
@@ -518,15 +514,15 @@ function FindersAndRichesHelper:InterfaceOptions()
 					enable = {
 						name = "Enable\n",
 						type = "toggle",
-						desc = "Enable/Disable tracking for Finders Keepers",
-						get = function(info) return self.settings.global.addFindersWaypoints end,
-						set = function(info, val) self.settings.global.addFindersWaypoints = val; FindersAndRichesHelper:ProcessOptions() end,
+						desc = "Enable/Disable tracking for Is Another Man's Treasure",
+						get = function(info) return self.settings.profile.addFindersWaypoints end,
+						set = function(info, val) self.settings.profile.addFindersWaypoints = val; FindersAndRichesHelper:ProcessOptions() end,
 						order = 0
 					}
 				}
 			},
 			richesOfPandaria = {
-				icon = "Interface\\Icons\\achievement_faction_lorewalkers",
+				icon = "Interface\\Icons\\racial_dwarf_findtreasure",
 				name = "Riches of Pandaria",
 				type = "group",
 				inline = true,
@@ -536,8 +532,8 @@ function FindersAndRichesHelper:InterfaceOptions()
 						name = "Enable", 
 						type = "toggle",
 						desc = "Enable/Disable tracking for Riches of Pandaria",
-						get = function(info) return self.settings.global.addRichesWaypoints end,
-						set = function(info, val) self.settings.global.addRichesWaypoints = val; FindersAndRichesHelper:ProcessOptions() end,
+						get = function(info) return self.settings.profile.addRichesWaypoints end,
+						set = function(info, val) self.settings.profile.addRichesWaypoints = val; FindersAndRichesHelper:ProcessOptions() end,
 						order = 0
 					}
 				}
@@ -553,8 +549,8 @@ function FindersAndRichesHelper:InterfaceOptions()
 						type = "select",
 						values = {"Zone Only", "All Zones"},
 						desc = "Tracks only waypoints for the current zone",
-						get = function(info) if self.settings.global.limitZone then return 1 else return 2 end end,
-						set = function(info, val) if val == 1 then self.settings.global.limitZone = true else self.settings.global.limitZone = false end FindersAndRichesHelper:ProcessOptions() end,
+						get = function(info) if self.settings.profile.limitZone then return 1 else return 2 end end,
+						set = function(info, val) if val == 1 then self.settings.profile.limitZone = true else self.settings.profile.limitZone = false end FindersAndRichesHelper:ProcessOptions() end,
 						order = 1,
 					},
 					missing = {
@@ -562,8 +558,8 @@ function FindersAndRichesHelper:InterfaceOptions()
 						type = "select",
 						values = {"Missing Only", "All Treasues"},
 						desc = "Tracks only missing treasures",
-						get = function(info) if self.settings.global.limitMissing then return 1; else return 2 end end,
-						set = function(info, val) if val == 1 then self.settings.global.limitMissing = true else self.settings.global.limitMissing = false end FindersAndRichesHelper:ProcessOptions() end,
+						get = function(info) if self.settings.profile.limitMissing then return 1; else return 2 end end,
+						set = function(info, val) if val == 1 then self.settings.profile.limitMissing = true else self.settings.profile.limitMissing = false end FindersAndRichesHelper:ProcessOptions() end,
 						order = 2,
 					}
 				}
@@ -578,8 +574,8 @@ function FindersAndRichesHelper:InterfaceOptions()
 						name = "Enable", 
 						type = "toggle",
 						desc = "Enable/Disable minimap icon from FRH",
-						get = function(info) return self.settings.global.showMinimapIcon end,
-						set = function(info, val) self.settings.global.showMinimapIcon = val  if not val then minimapIcon:Hide("FRH_ldbIcon") else minimapIcon:Show("FRH_ldbIcon") end end,
+						get = function(info) return not self.settings.profile.minimapIconSettings.hide end,
+						set = function(info, val) self.settings.profile.minimapIconSettings.hide = not val  if not val then minimapIcon:Hide("FRH_ldbIcon") else minimapIcon:Show("FRH_ldbIcon") end end,
 						order = 0
 					}
 				}
@@ -611,13 +607,13 @@ local HIDE_MINIMAP_YES_ID=6
 local HIDE_MINIMAP_NO_ID=7
 
 local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
-			{ text = "Finders Keepers", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
-																			FindersAndRichesHelper.settings.global.addFindersWaypoints = checked
+			{ text = "Is Another Man's Treasure", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
+																			FindersAndRichesHelper.settings.profile.addFindersWaypoints = checked
 																			FindersAndRichesHelper:ProcessOptions()
 																		end 
 			},
 			{ text = "Riches of Pandaria", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
-																				FindersAndRichesHelper.settings.global.addRichesWaypoints = checked
+																				FindersAndRichesHelper.settings.profile.addRichesWaypoints = checked
 																				FindersAndRichesHelper:ProcessOptions()
 																			end 
 			},
@@ -627,9 +623,8 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 																			
 																			--print ('selecting value zone only' )
 																			
-																			if(not FindersAndRichesHelper.settings.global.limitZone) then -- in this case 11 is selected
-																				print ('selecting value zone only 1' )
-																				FindersAndRichesHelper.settings.global.limitZone = true
+																			if(not FindersAndRichesHelper.settings.profile.limitZone) then -- in this case 11 is selected
+																				FindersAndRichesHelper.settings.profile.limitZone = true
 																				
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID) --doesn't make any sence: the reverse order doesn't work
@@ -637,7 +632,6 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 																				
 																				FindersAndRichesHelper:ProcessOptions()
 																			else -- dont update in case it is already selected
-																				print ('selecting value zone only 2' )
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID)
 																			end
 																			
@@ -647,14 +641,12 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 					{ text = "All Zones", keepShownOnClick= true, value= ZONE_LIMITATION_ALL_ZONES_ID, func = function(self, arg1, arg2, checked) 
 																			
 																			
-																			if(FindersAndRichesHelper.settings.global.limitZone) then -- in this case 11 is selected
-																				print ('selecting value all zones 1' )
-																				FindersAndRichesHelper.settings.global.limitZone = false
+																			if(FindersAndRichesHelper.settings.profile.limitZone) then -- in this case 11 is selected
+																				FindersAndRichesHelper.settings.profile.limitZone = false
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ZONE_ONLY_ID)
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
 																				FindersAndRichesHelper:ProcessOptions()
-																			elseif(not FindersAndRichesHelper.settings.global.limitZone) then -- dont update in case it is already selected
-																				print ('selecting value all zones 2' )
+																			elseif(not FindersAndRichesHelper.settings.profile.limitZone) then -- dont update in case it is already selected
 																				UIDropDownMenu_SetSelectedValue(menuFrame, ZONE_LIMITATION_ALL_ZONES_ID)
 																			end
 																			
@@ -665,15 +657,15 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 			{text = "Tracked Treasures", notCheckable=true, keepShownOnClick= true, hasArrow = true,
 				menuList = {
 					{ text = "Missing Only", keepShownOnClick= true, value=TRACKED_TREASURES_MISSING_ONLY_ID, func = function(self, arg1, arg2, checked)
-																				if(not FindersAndRichesHelper.settings.global.limitMissing) then -- in this case 11 is selected
+																				if(not FindersAndRichesHelper.settings.profile.limitMissing) then -- in this case 11 is selected
 																			
-																					FindersAndRichesHelper.settings.global.limitMissing = true
+																					FindersAndRichesHelper.settings.profile.limitMissing = true
 																					
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
 																					
 																					FindersAndRichesHelper:ProcessOptions()
-																				elseif(FindersAndRichesHelper.settings.global.limitMissing) then -- dont update in case it is already selected
+																				elseif(FindersAndRichesHelper.settings.profile.limitMissing) then -- dont update in case it is already selected
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
 																				end
 																				 
@@ -681,14 +673,14 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 																			end 
 					},
 					{ text = "All Treasures", keepShownOnClick= true, value=TRACKED_TREASURES_ALL_TREASURES_ID, func = function(self, arg1, arg2, checked) 
-																				if(FindersAndRichesHelper.settings.global.limitMissing) then -- in this case 11 is selected
+																				if(FindersAndRichesHelper.settings.profile.limitMissing) then -- in this case 11 is selected
 																			
-																					FindersAndRichesHelper.settings.global.limitMissing = false
+																					FindersAndRichesHelper.settings.profile.limitMissing = false
 																					
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_MISSING_ONLY_ID)
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
 																					FindersAndRichesHelper:ProcessOptions()
-																				elseif(not FindersAndRichesHelper.settings.global.limitMissing) then -- dont update in case it is already selected
+																				elseif(not FindersAndRichesHelper.settings.profile.limitMissing) then -- dont update in case it is already selected
 																					UIDropDownMenu_SetSelectedValue(menuFrame, TRACKED_TREASURES_ALL_TREASURES_ID)
 																				end
 																			 end
@@ -697,10 +689,10 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 			},
 			{text="Hide Minimap Icon", notCheckable=true, keepShownOnClick= true, hasArrow = true, menuList = {
 					{ text = "Yes", value=HIDE_MINIMAP_YES_ID, func = function(self, arg1, arg2, checked)
-																		if(not FindersAndRichesHelper.settings.global.showMinimapIcon) then -- in this case 11 is selected
-																			FindersAndRichesHelper.settings.global.showMinimapIcon = true
-																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
-																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
+																		if(not FindersAndRichesHelper.settings.profile.minimapIconSettings.hide) then -- in this case 11 is selected
+																			FindersAndRichesHelper.settings.profile.minimapIconSettings.hide = true
+																			--UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
+																			--UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
 																			minimapIcon:Hide("FRH_ldbIcon")
 																		else -- dont update in case it is already selected
 																			UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
@@ -708,9 +700,8 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 																	  end 
 					},
 					{ text = "No", keepShownOnClick= true, value=HIDE_MINIMAP_NO_ID, func = function(self, arg1, arg2, checked) 
-																				if(FindersAndRichesHelper.settings.global.showMinimapIcon) then -- in this case 11 is selected
-
-																					FindersAndRichesHelper.settings.global.showMinimapIcon = false
+																				if(FindersAndRichesHelper.settings.profile.minimapIconSettings.hide) then -- in this case 11 is selected
+																					FindersAndRichesHelper.settings.profile.minimapIconSettings.hide = false
 																					UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_YES_ID)
 																					UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
 																					minimapIcon:Show("FRH_ldbIcon")
@@ -730,17 +721,17 @@ function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
 		
 	
 	--set actual values
-	menu[FINDERS_KEEPERS_INDEX].checked = self.settings.global.addFindersWaypoints
-	menu[RICHES_OF_PANDARIA_INDEX].checked = self.settings.global.addRichesWaypoints
+	menu[FINDERS_KEEPERS_INDEX].checked = self.settings.profile.addFindersWaypoints
+	menu[RICHES_OF_PANDARIA_INDEX].checked = self.settings.profile.addRichesWaypoints
 
-	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ZONE_ONLY_INDEX].checked = self.settings.global.limitZone
-	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ALL_ZONES_INDEX].checked = not self.settings.global.limitZone
+	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ZONE_ONLY_INDEX].checked = self.settings.profile.limitZone
+	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ALL_ZONES_INDEX].checked = not self.settings.profile.limitZone
 	
-	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_MISSING_ONLY_INDEX].checked = self.settings.global.limitMissing
-	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_ALL_TREASURES_INDEX].checked = not self.settings.global.limitMissing
+	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_MISSING_ONLY_INDEX].checked = self.settings.profile.limitMissing
+	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_ALL_TREASURES_INDEX].checked = not self.settings.profile.limitMissing
 	
-	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_YES_INDEX].checked = not self.settings.global.showMinimapIcon
-	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_NO_INDEX].checked = self.settings.global.showMinimapIcon
+	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_YES_INDEX].checked = self.settings.profile.minimapIconSettings.hide
+	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_NO_INDEX].checked = not self.settings.profile.minimapIconSettings.hide
 	
 	menuFrame:SetPoint("Center", parentFrame, "Center")
 	EasyMenu(menu, menuFrame, menuFrame, 0 , 0, "MENU") 
