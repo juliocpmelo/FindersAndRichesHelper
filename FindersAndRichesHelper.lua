@@ -69,9 +69,9 @@ local findersKeepers	={ --Jade Forest items
 						 {map=806, qid = 31307 , desc = 'Jade Infused Blade', positions = {{ x=39.26 , y=46.65}}, npc = {id='64272', name='Jade Warrior Statue'}}, -- npc scan id 64272 Jade Warrior Statue
 						 {map=806, qid = 31397 , desc = 'Wodin\'s Mantid Shanker', positions = {{ x=39.00 , y=7.00}}},
 						  --Valley of the Four Winds items
-						 {map=807, qid = 31284 , desc = 'Ancient Pandaren Fishing Charm', positions = {{ x=45.40 , y=38.20}}, npc = {id=64004, name='Ghostly Pandaren Fisherman'}}, -- npc scan id 64004 Ghostly Pandaren Fisherman
+						 {map=807, qid = 31284 , desc = 'Ancient Pandaren Fishing Charm', positions = {{ x=46.80, y=24.50}}, npc = {id=64004, name='Ghostly Pandaren Fisherman'}}, -- npc scan id 64004 Ghostly Pandaren Fisherman
 						 {map=807, qid = 31292 , desc = 'Ancient Pandaren Woodcutter', positions = {{ x=45.40 , y=38.20}}, npc = {id=64191, name='Ghostly Pandaren Craftsman'}}, -- npc scan id 64191 Ghostly Pandaren Craftsman
-						 {map=807, qid = 31406 , desc = 'Cache of Pilfered Goods', submapEntrance={note='Cave entrance', positions = {{x=43,y=35}}, map=807}, positions = {{ x=43.50 , y=37.40}}},
+						 {map=807, qid = 31406 , desc = 'Cache of Pilfered Goods', submapEntrance={note='Cave entrance', positions = {{x=43.54,y=35.38}}, map=807}, positions = {{ x=43.50 , y=37.40}}},
 						 {map=807, qid = 31407 , desc = 'Staff of the Hidden Master', positions = {{ x=15.40 , y=29.10}, { x=17.50 , y=35.70}, { x=19.10 , y=37.90}, { x=15.00 , y=33.70}, { x=19.00 , y=42.50}}},
 						  -- Krasarang Wilds
 						 {map=857, qid = 31410 , desc = 'Equipment Locker', extraNote='On the lowest deck of the ship', positions = {{ x=42.00 , y=91.00}}},
@@ -106,6 +106,29 @@ local currentWayPoints = {}
  
 --vector to store the current tracked npcs
 local currentTrackedNpcs = {}
+
+-- checks if the current zone is any of the achievement's zones
+function FindersAndRichesHelper:isAchievementZone()
+	local zoneName = GetZoneText()
+	--self:Print('zone name ' .. zoneName)
+	if self.settings.profile.addFindersWaypoints then
+		for k, a in pairs(findersKeepers) do
+			if zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
+				return true
+			end
+		end
+	end
+	
+	if self.settings.profile.addRichesWaypoints then
+		for k, a in pairs(richesOfPandaria) do
+			if zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
+				return true
+			end
+		end
+	end
+	
+	return false
+end
  
 --called when the player changes the map or when he logs in the game
 function eventHandler(frame, event, ...)
@@ -113,27 +136,33 @@ function eventHandler(frame, event, ...)
 	-- TODO: add achievement track or quest track to remove waypoints when a item is found
 	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
 	--FindersAndRichesHelper:Print('event fired ' .. event)
-	if (event == "ZONE_CHANGED_NEW_AREA") then
-		if FindersAndRichesHelper.settings.profile.limitZone then -- remove the waypoints from previous area and add for the new one
-			--FindersAndRichesHelper:Print('clear npcs and waypoints')
+	if FindersAndRichesHelper:isAchievementZone() then
+		if (event == "ZONE_CHANGED_NEW_AREA") then
+			if FindersAndRichesHelper.settings.profile.limitZone then -- remove the waypoints from previous area and add for the new one
+				--FindersAndRichesHelper:Print('clear npcs and waypoints')
+				FindersAndRichesHelper:ProcessOptions()
+				--FindersAndRichesHelper:ClearWaypoints()
+				--FindersAndRichesHelper:ClearNpcs()
+				--if FindersAndRichesHelper.settings.profile.addFindersWaypoints then
+					--FindersAndRichesHelper:Print('processing waypoints to Finders')
+					--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, richesOfPandaria)
+				--end
+				--if FindersAndRichesHelper.settings.profile.addRichesWaypoints then 
+					--FindersAndRichesHelper:Print('processing waypoints to Riches')
+					--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, findersKeepers)
+				--end
+			end
+		elseif event == "PLAYER_ENTERING_WORLD" then -- reload the configurations from previous sessions
 			FindersAndRichesHelper:ProcessOptions()
-			--FindersAndRichesHelper:ClearWaypoints()
-			--FindersAndRichesHelper:ClearNpcs()
-			--if FindersAndRichesHelper.settings.profile.addFindersWaypoints then
-				--FindersAndRichesHelper:Print('processing waypoints to Finders')
-				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, richesOfPandaria)
-			--end
-			--if FindersAndRichesHelper.settings.profile.addRichesWaypoints then 
-				--FindersAndRichesHelper:Print('processing waypoints to Riches')
-				--FindersAndRichesHelper:SetAchievementWaypoints(FindersAndRichesHelper.settings.profile.limitZone, FindersAndRichesHelper.settings.profile.limitMissing, findersKeepers)
-			--end
+		elseif event == "PLAYER_LEAVING_WORLD" then -- remove waypoints from tomtom
+			FindersAndRichesHelper:ClearWaypoints();
+			FindersAndRichesHelper:ClearNpcs();
 		end
-	elseif event == "PLAYER_ENTERING_WORLD" then -- reload the configurations from previous sessions
-		FindersAndRichesHelper:ProcessOptions()
-	elseif event == "PLAYER_LEAVING_WORLD" then -- remove waypoints from tomtom
+	else
 		FindersAndRichesHelper:ClearWaypoints();
 		FindersAndRichesHelper:ClearNpcs();
 	end
+	
 	--QUEST_WATCH_UPDATE
 	--PLAYER_LEAVING_WORLD
 	
@@ -179,7 +208,12 @@ end
 		minimapIcon = LibStub("LibDBIcon-1.0")
 		minimapIcon:Register("FRH_ldbIcon", findersandRichesHelperLDB, self.settings.profile.minimapIconSettings)
 		
-		
+		if TomTom == nil and TomTomLite == nil then
+			self:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
+		end
+		if _NPCScan == nil then 
+			self:Print("|cffffff66warning:|r NPCScan not found without it the addon will not be able to track the achievements npcs. NPCScan could be found on www.curse.com")
+		end
 	
 	end
 end
@@ -204,7 +238,11 @@ function FindersAndRichesHelper:ProcessOptions()
 	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, richesOfPandaria)
   end
   if self.settings.profile.addFindersWaypoints or self.settings.profile.addRichesWaypoints then
-	TomTom:SetClosestWaypoint()
+	if TomTom and TomTom.SetClosestWaypoint then
+		TomTom:SetClosestWaypoint()
+	elseif TomTomLite and TomTomLite.SetClosestWaypoint then
+		TomTomLite:SetClosestWaypoint()
+	end
   end
 end
 
@@ -320,12 +358,12 @@ end
 function FindersAndRichesHelper:SetAchievementWaypoints(limitZone, limitMissing, achievementCriteriaSet)
 	local zoneName = GetZoneText()
 	
+	if TomTom == nil and TomTomLite == nil then
+		self:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
+		return
+	end
 	
 	for k, a in pairs(achievementCriteriaSet) do
-		--self:Print("set waypoint to " .. a.desc)
-	--	if a.submapEntrance ~= nil then
-		--	 self:Print("set submap entrance in map" .. a.submapEntrance.map)
-	--	end
 		if limitZone and zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
 		
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
@@ -426,7 +464,11 @@ local function waypointArrivalCallback(event, uid, range, distance, lastdistance
 		--FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.private.submapWaypoints))
 		FindersAndRichesHelper:AddWaypoint(uid.private.mapId, uid.private.submapWaypoints, uid.private.submapTitle)
 	end
-	TomTom:SetClosestWaypoint()
+	if TomTom and TomTom.SetClosestWaypoint then
+		TomTom:SetClosestWaypoint()
+	elseif TomTomLite and TomTomLite.SetClosestWaypoint then
+		TomTomLite:SetClosestWaypoint()
+	end
 end
 
 --adds a waypoint in TomTom case it is installed
@@ -436,14 +478,11 @@ function FindersAndRichesHelper:AddWaypoint(map, mainWaypoints, title, submapId,
 		wayPointId = TomTom:AddMFWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title} )
 	  elseif TomTomLite and TomTomLite.AddWaypoint then
 		wayPointId = TomTomLite.AddWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title})
-	  else
-		s = GetMapNameByID(map)
-		-- show floor?
-		s = s .. " (" .. pos.x*100 .. ", " .. pos.y*100 .. "): " .. title
-		self:Print(s)
 	  end
 	  if wayPointId ~= nil then
-		  wayPointId.callbacks.distance[wayPointId.arrivaldistance] = waypointArrivalCallback
+		  if wayPointId.callbacks~=nil then
+			wayPointId.callbacks.distance[wayPointId.arrivaldistance] = waypointArrivalCallback
+		  end
 		  currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
 		  if submapId~=nil then
 			  wayPointId.private = {}
