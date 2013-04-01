@@ -12,9 +12,11 @@ Done
   - Check the dugeon data and waypoints inside (or others) ->done
 Todo List
 - Fix the icons ->done
+- Try to update tomtom arrow to closest waypoint -> done
 
 TODO
 - Add a list of already gottem/missing items
 - Check the possibility of adding waypoints inside of dugeons (not in the world map)
 - Fix the issue with the Saurok Stone Tablet
-- Try to update tomtom arrow to closest waypoint
+- Fix issue with the NpcScan warning.
+	- Test the npc scan interface, since it seems not to be popping when the npcs are found
