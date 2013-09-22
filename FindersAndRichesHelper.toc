@@ -1,4 +1,4 @@
-## Interface: 50100
+## Interface: 50400
 ## Title: Finders and Riches Helper
 ## Notes: Helps the player to get the Finders Keepers and Riches of Pandaria achievements.
 ## Author: Julio Melo
