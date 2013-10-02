@@ -106,8 +106,8 @@ local findersKeepers	={
 local otherTreasures ={
 						  --Valley of the Four Winds items
 						 {map=807, qid = 31869 , desc = '|cffff1111(Doesn\'t count towards any Achievement)|r\nBoat-Building Instructions', positions = {{ x=92.00, y=39.00}} },
-						  -- Dread Wastes
-						 {map=858, qid = 31863 , desc = '|cffff1111(Doesn\'t count towards any Achievement)|r\nStack of Papers', positions = {{ x=52.10, y=73.30}}},
+						  -- Krasarang Wilds
+						 {map=857, qid = 31863 , desc = '|cffff1111(Doesn\'t count towards any Achievement)|r\nStack of Papers', positions = {{ x=52.10, y=73.30}}},
 						}
 
 
@@ -595,9 +595,6 @@ end
 
 
 function FindersAndRichesHelper:InterfaceOptions()
-	local texSize = 20
-	local canBeTank, canBeHealer, canBeDamager = UnitGetAvailableRoles("player")
-	local greyTint = {155, 155, 155}
 	--TODO list of all gotten/missing treasures
 	return {
 		name = addonName,
@@ -639,10 +636,27 @@ function FindersAndRichesHelper:InterfaceOptions()
 					}
 				}
 			},
+			otherTreasures = {
+				icon = "Interface\\Icons\\racial_dwarf_findtreasure",
+				name = "Other Treasures",
+				type = "group",
+				inline = true,
+				order = 3,
+				args = {
+					enable = {
+						name = "Enable", 
+						type = "toggle",
+						desc = "Enable/Disable tracking for the Other Treasures",
+						get = function(info) return self.settings.profile.addOtherTreasuresWaypoints end,
+						set = function(info, val) self.settings.profile.addOtherTreasuresWaypoints = val; FindersAndRichesHelper:ProcessOptions() end,
+						order = 0
+					}
+				}
+			},
 			trackingOptions = {
 				name = "Tracking Options",
 				type = "group",
-				order = 3,
+				order = 4,
 				inline = true,
 				args = {
 					zone = {
@@ -669,7 +683,7 @@ function FindersAndRichesHelper:InterfaceOptions()
 				name = "Minimap Icon",
 				type = "group",
 				inline = true,
-				order = 4,
+				order = 5,
 				args = {
 					enable = {
 						name = "Enable", 
