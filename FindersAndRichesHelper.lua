@@ -9,12 +9,13 @@ debug = true
 --
 local L
 
---local Astrolabe = DongleStub("Astrolabe-1.0")
+--local Astrolabe test = DongleStub("Astrolabe-1.0")
 
 FindersAndRichesHelper = LibStub("AceAddon-3.0"):NewAddon("FindersAndRichesHelper", "AceConsole-3.0")
 
 local addonName = "Finders And Riches Helper (frh)"
-
+FindersAndRichesHelper.updateTimeInterval = 2
+FindersAndRichesHelper.timeSinceLastUpdate = 0
 
 
 local defaultSettings = {
@@ -23,8 +24,9 @@ local defaultSettings = {
 			limitMissing = true,
 			addFindersWaypoints = true,
 			addRichesWaypoints = true,
+			addOtherTreasuresWaypoints = true,
 			minimapIconSettings = {
-				hide = false,
+			hide = false,
 			},
 		}
 }
@@ -62,7 +64,8 @@ local richesOfPandaria	={ --Jade Forest items
 						 }
 
 -- finders keepers locations according wowhead (12/03/12)
-local findersKeepers	={ --Jade Forest items
+local findersKeepers	={ 
+						 --Jade Forest items
 						 {map=806, qid = 31402 , desc = 'Ancient Jinyu Staff', positions = {{ x=47.10 , y=67.40}, { x=46.20 , y=71.20}, { x=44.90 , y=64.60}}},
 						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick',  extraNote='Inside Greenstone Quarry', submapEntrance={note='Greenstone Quarry entrance and first spot', positions = {{x=46.1, y=29.1}}, map=806}, positions = {{ x=46.10 , y=29.10} , { x=44.10 , y=27.00}, {x=43.80 , y=30.70}}},
 						 {map=806, qid = 31403 , desc = 'Hammer of Ten Thunders', positions = {{ x=41.80 , y=17.60}, { x=43.00 , y=11.60}}},
@@ -76,7 +79,7 @@ local findersKeepers	={ --Jade Forest items
 						  -- Krasarang Wilds
 						 {map=857, qid = 31410 , desc = 'Equipment Locker', extraNote='On the lowest deck of the ship', positions = {{ x=42.00 , y=91.00}}},
 						 {map=857, qid = 31409 , desc = 'Pandaren Fishing Spear', positions = {{ x=50.80 , y=49.30}}},
-						 {map=857, qid = 31411 , desc = 'Recipe: Banana Infused Rum', extraNote='Search for a Barrel of Banana Infused Rum', positions = {{ x=52.30 , y=88.00}}},
+						 {map=857, qid = 31411 , desc = 'Recipe: Banana Infused Rum', extraNote='Search for a Barrel of Banana Infused Run on the ship\non top of the ridge, not in the cave below.', positions = {{ x=52.30 , y=88.00}}},
 						  -- Kun-Lai Summit
 						 {map=809, qid = 31413 , desc = 'Hozen Warrior Spear', submapEntrance={note='The Deeper entrance', positions = {{x=52.8, y=71.3}}, map=809}, positions = {{ x=51.50 , y=74.00}}},
 						 {map=809, qid = 31304 , desc = 'Kafa Press', submapEntrance={note='Cave entrance', positions = {{x=37.5, y=78.00}}, map=809}, positions = {{ x=37.37 , y=77.84}}, npc={id=64227, name='Frozen Trail Packer'}},
@@ -97,8 +100,15 @@ local findersKeepers	={ --Jade Forest items
 						 {map=858, qid = 31434 , desc = 'Swarming Cleaver of Ka\'roz', extraNote='At the bottom of the sea', positions = {{ x=56.80 , y=77.60}}},
 						 {map=858, qid = 31437 , desc = 'Swarmkeeper\'s Medallion', positions = {{ x=54.2, y=56.4}}},
 						 {map=858, qid = 31666 , desc = 'Wind-Reaver\'s Dagger of Quick Strikes', positions = {{ x=71.80 , y=36.10}}},
-						 }
+						}
 
+-- those treasures doesn't count twoards any achievement, but also grant gold and xp as well
+local otherTreasures ={
+						  --Valley of the Four Winds items
+						 {map=807, qid = 31869 , desc = '|cffff1111(Doesn\'t count towards any Achievement)|r\nBoat-Building Instructions', positions = {{ x=92.00, y=39.00}} },
+						  -- Dread Wastes
+						 {map=858, qid = 31863 , desc = '|cffff1111(Doesn\'t count towards any Achievement)|r\nStack of Papers', positions = {{ x=52.10, y=73.30}}},
+						}
 
 
 --vector to store the current showed waypoints 
@@ -127,8 +137,18 @@ function FindersAndRichesHelper:isAchievementZone()
 		end
 	end
 	
+	if self.settings.profile.addOtherTreasuresWaypoints then
+		for k, a in pairs(otherTreasures) do
+			if zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
+				return true
+			end
+		end
+	end
+	
 	return false
 end
+
+local addosnCheck = false;
  
 --called when the player changes the map or when he logs in the game
 function eventHandler(frame, event, ...)
@@ -136,6 +156,17 @@ function eventHandler(frame, event, ...)
 	-- TODO: add achievement track or quest track to remove waypoints when a item is found
 	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
 	--FindersAndRichesHelper:Print('event fired ' .. event)
+	
+	-- checks the presence of either TomTom or TomTomLite and NpcScan
+	if addosnCheck == false and TomTom == nil and TomTomLite == nil then
+		self:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
+	end
+	if addosnCheck == false and _NPCScan == nil then 
+		self:Print("|cffffff66warning:|r NPCScan not found without it the addon will not be able to track the achievements npcs. NPCScan could be found on www.curse.com")
+	end
+	addosnCheck = true;
+	
+	
 	if FindersAndRichesHelper:isAchievementZone() then
 		if (event == "ZONE_CHANGED_NEW_AREA") then
 			if FindersAndRichesHelper.settings.profile.limitZone then -- remove the waypoints from previous area and add for the new one
@@ -163,18 +194,46 @@ function eventHandler(frame, event, ...)
 		FindersAndRichesHelper:ClearNpcs();
 	end
 	
+	
+	
 	--QUEST_WATCH_UPDATE
 	--PLAYER_LEAVING_WORLD
 	
 end
 
 
+
+function onUpdateHandler(self, elapsed)
+	--update map every change if show mode is enabled.
+	-- TODO: add achievement track or quest track to remove waypoints when a item is found
+	-- QUEST_WATCH_UPDATE, CRITERIA_UPDATE or 
+	--FindersAndRichesHelper:Print('event fired ' .. event)
+	
+	FindersAndRichesHelper.timeSinceLastUpdate = FindersAndRichesHelper.timeSinceLastUpdate + elapsed; 	
+	if (FindersAndRichesHelper.timeSinceLastUpdate > FindersAndRichesHelper.updateTimeInterval) then
+		FindersAndRichesHelper.timeSinceLastUpdate = 0;
+		 if FindersAndRichesHelper.settings.profile.addFindersWaypoints or 
+			FindersAndRichesHelper.settings.profile.addRichesWaypoints or
+		    FindersAndRichesHelper.settings.profile.addOtherTreasuresWaypoints then
+			if TomTom and TomTom.SetClosestWaypoint then
+				TomTom:SetClosestWaypoint()
+			elseif TomTomLite and TomTomLite.SetClosestWaypoint then
+				TomTomLite:SetClosestWaypoint()
+			end
+		end
+	end
+
+	
+	--QUEST_WATCH_UPDATE
+	--PLAYER_LEAVING_WORLD
+	
+end
 --mini
 
  
- menuFrame = nil
- 
- function FindersAndRichesHelper:OnInitialize()
+menuFrame = nil
+
+function FindersAndRichesHelper:OnInitialize()
 	-- Called when the addon is loaded
 	self:RegisterChatCommand("findersandricheshelper", "SlashCommand")
 	self:RegisterChatCommand("frh", "SlashCommand")
@@ -188,33 +247,27 @@ end
 		updaterFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Finders And Riches Helper (frh)")
 		updaterFrame.default = function() self:SetDefaultOptions() end
 		updaterFrame:SetScript("OnEvent", eventHandler)
-		--updaterFrame:SetScript("OnUpdate", updateHandler)
+		updaterFrame:SetScript("OnUpdate", onUpdateHandler)
+
 		updaterFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		updaterFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		updaterFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
 		updaterFrame:Show()
-		
-		
+
+
 		local findersandRichesHelperLDB = LibStub("LibDataBroker-1.1"):NewDataObject("frh_ldb", {
-																								type = "data source",
-																								text = "Finders and Riches Helper",
-																								icon = "Interface\\Icons\\inv_misc_ornatebox",
-																								OnClick =	function(clickedframe, button) 
-																												if button == "LeftButton" then
-																													FindersAndRichesHelper:MinimapButtonOptions(clickedframe)
-																												end
-																											 end,
-																								})
+			type = "data source",
+			text = "Finders and Riches Helper",
+			icon = "Interface\\Icons\\inv_misc_ornatebox",
+			OnClick =	function(clickedframe, button) 
+				if button == "LeftButton" then
+					FindersAndRichesHelper:MinimapButtonOptions(clickedframe)
+				end
+			end,
+		})
 		minimapIcon = LibStub("LibDBIcon-1.0")
 		minimapIcon:Register("FRH_ldbIcon", findersandRichesHelperLDB, self.settings.profile.minimapIconSettings)
-		
-		if TomTom == nil and TomTomLite == nil then
-			self:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
-		end
-		if _NPCScan == nil then 
-			self:Print("|cffffff66warning:|r NPCScan not found without it the addon will not be able to track the achievements npcs. NPCScan could be found on www.curse.com")
-		end
-	
+
 	end
 end
 
@@ -223,6 +276,7 @@ function FindersAndRichesHelper:SetDefaultOptions()
   self.settings.profile.limitZone = true
   self.settings.profile.addFindersWaypoints = true
   self.settings.profile.addRichesWaypoints = true
+  self.settings.profile.addOtherTreasuresWaypoints = true
   FindersAndRichesHelper:ProcessOptions()
 end
 
@@ -237,12 +291,9 @@ function FindersAndRichesHelper:ProcessOptions()
 	--self:Print('processing waypoints to Riches')
 	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, richesOfPandaria)
   end
-  if self.settings.profile.addFindersWaypoints or self.settings.profile.addRichesWaypoints then
-	if TomTom and TomTom.SetClosestWaypoint then
-		TomTom:SetClosestWaypoint()
-	elseif TomTomLite and TomTomLite.SetClosestWaypoint then
-		TomTomLite:SetClosestWaypoint()
-	end
+  if self.settings.profile.addOtherTreasuresWaypoints then
+	--self:Print('processing waypoints to Riches')
+	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, otherTreasures)
   end
 end
 
@@ -251,11 +302,11 @@ function FindersAndRichesHelper:PrintUsage()
 
   s = "\n"
   s = s .. "|cff7777ff/FindersAndRichesHelper ...|r\n"
-  s = s .. "|cff7777ff/use the commands without the riches or finders key words to track/clear both achievement critaria...|r\n"
-  s = s .. "|cff7777ff/frh (riches|finders) all zone|r " .. "add waypoints to all items in current zone, including already found ones" .. "\n"
-  s = s .. "|cff7777ff/frh (riches|finders) missing zone|r " .. "add waypoints to all items in current zone, excluding alrady found ones" .. "\n"
-  s = s .. "|cff7777ff/frh (riches|finders) all|r " .. "add waypoints to all items in all maps, including already found ones" .. "\n"
-  s = s .. "|cff7777ff/frh (riches|finders) all missing|r " .. "add waypoints to all items in all maps, excluding already found ones" .. "\n"
+  s = s .. "|cff7777ff/use the commands without the riches, finders or others key words to track/clear both achievement critaria...|r\n"
+  s = s .. "|cff7777ff/frh (riches|finders|others) all zone|r " .. "add waypoints to all items in current zone, including already found ones" .. "\n"
+  s = s .. "|cff7777ff/frh (riches|finders|others) missing zone|r " .. "add waypoints to all items in current zone, excluding alrady found ones" .. "\n"
+  s = s .. "|cff7777ff/frh (riches|finders|others) all|r " .. "add waypoints to all items in all maps, including already found ones" .. "\n"
+  s = s .. "|cff7777ff/frh (riches|finders|others) all missing|r " .. "add waypoints to all items in all maps, excluding already found ones" .. "\n"
   s = s .. "|cff7777ff/frh clear|r " .. "clear all waypoints to the tracked achievements" .. "\n"
   s = s .. "|cff7777ff/frh debug|r " .. "esable/disable debug mode"
   
@@ -267,87 +318,105 @@ function FindersAndRichesHelper:SlashCommand(command)
   local limitZone, limitMissing, distance
   
   
-  addFindersWaypoints = false
-  addRichesWaypoints = false
-  limitMissing = true
-  limitZone = true
-  clearWaypoints = false
+  addFindersWaypoints = self.settings.profile.addFindersWaypoints
+  addRichesWaypoints = self.settings.profile.addRichesWaypoints
+  addOtherTreasuresWaypoints = self.settings.profile.addOtherTreasuresWaypoints
+  limitMissing = self.settings.profile.limitMissing
+  limitZone = self.settings.profile.limitZone
+  clearWaypoints = self.settings.profile.clearWaypoints
   
-  --debug mode for test only
-  if command:match"^%s*debug%s*$" then
-    debug = not debug
-    local str = "\n"
-    if debug then
-      str = str .. 'Debug mode enabled'
-    else
-      str = str .. 'Debug mode disabled'
-    end
-    self:Print(str)
-  -- both achievements at the same time
-  elseif command:match"^%s*all%s+zone%s*$" then -- markers only in the current zone, but including already found items
-	limitZone = true
-	addFindersWaypoints = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
-	limitZone = true
-	limitMissing = true
-	addFindersWaypoints = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*all%s*$" then -- markers in all maps, but including already found items
-	addFindersWaypoints = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*missing%s*$" then -- markers in all maps, but excluding already found items
-	limitMissing = true
-	addFindersWaypoints = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*all%s+missing%s*$" then
-	limitMissing = true
-	addFindersWaypoints = true
-	limitMissing = true
-   elseif command:match"^%s*clear%s*$" then
-    --self:Print('clearing all waypoints')
-	clearWaypoints = true
-  -- tracker only for the Finders Keepers Achievement
-  elseif command:match"^%s*finders%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
-	--self:Print('finders all zone')
-	limitZone = true
-	addFindersWaypoints = true
-  elseif command:match"^%s*finders%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
-	--self:Print('finders missing zone')
-	limitZone = true
-	limitMissing = true
-	addFindersWaypoints = true
-  elseif command:match"^%s*finders%s+all%s*$" then -- markers in all maps, but including already found items
-	---self:Print('finders all')
-	addFindersWaypoints = true
-  elseif command:match"^%s*finders%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
-	--self:Print('finders all missing')
-	limitMissing = true
-	addFindersWaypoints = true
-  -- tracker only for the Riches of Pandaria Achievement
-  elseif command:match"^%s*riches%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
-	--self:Print('riches all zone')
-	limitZone = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*riches%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
-	--self:Print('riches missing zone')
-	limitZone = true
-	limitMissing = true
-	addRichesWaypoints = true
-  elseif command:match"^%s*riches%s+all%s*$" then -- markers in all maps, but including already found items
-	--self:Print('riches all')
-	addRichesWaypoints = true
-  elseif command:match"^%s*riches%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
-	--self:Print('riches all')
-	addRichesWaypoints = true
-	limitMissing = true
-  else
-    FindersAndRichesHelper:PrintUsage()
-  end
+	--debug mode for test only
+	if command:match"^%s*debug%s*$" then
+		debug = not debug
+		local str = "\n"
+		if debug then
+			str = str .. 'Debug mode enabled'
+		else
+			str = str .. 'Debug mode disabled'
+		end
+		self:Print(str)
+		-- both achievements at the same time
+	elseif command:match"^%s*all%s+zone%s*$" then -- markers only in the current zone, but including already found items
+		limitZone = true
+		addFindersWaypoints = true
+		addRichesWaypoints = true
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
+		limitZone = true
+		limitMissing = true
+		addFindersWaypoints = true
+		addRichesWaypoints = true
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*all%s*$" then -- markers in all maps, but including already found items
+		addFindersWaypoints = true
+		addRichesWaypoints = true
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*missing%s*$" then -- markers in all maps, but excluding already found items
+		limitMissing = true
+		addFindersWaypoints = true
+		addRichesWaypoints = true
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*all%s+missing%s*$" then
+		limitMissing = true
+		addFindersWaypoints = true
+		limitMissing = true
+	elseif command:match"^%s*clear%s*$" then
+		--self:Print('clearing all waypoints')
+		clearWaypoints = true
+		-- tracker only for the Finders Keepers Achievement
+	elseif command:match"^%s*finders%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
+		--self:Print('finders all zone')
+		limitZone = true
+		addFindersWaypoints = true
+	elseif command:match"^%s*finders%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
+		--self:Print('finders missing zone')
+		limitZone = true
+		limitMissing = true
+		addFindersWaypoints = true
+	elseif command:match"^%s*finders%s+all%s*$" then -- markers in all maps, but including already found items
+		---self:Print('finders all')
+		addFindersWaypoints = true
+	elseif command:match"^%s*finders%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
+		--self:Print('finders all missing')
+		limitMissing = true
+		addFindersWaypoints = true
+		-- tracker only for the Riches of Pandaria Achievement
+	elseif command:match"^%s*riches%s+all%s+zone%s*$" then -- markers only in the current zone, but including already found items
+		--self:Print('riches all zone')
+		limitZone = true
+		addRichesWaypoints = true
+	elseif command:match"^%s*riches%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
+		--self:Print('riches missing zone')
+		limitZone = true
+		limitMissing = true
+		addRichesWaypoints = true
+	elseif command:match"^%s*riches%s+all%s*$" then -- markers in all maps, but including already found items
+		--self:Print('riches all')
+		addRichesWaypoints = true
+	elseif command:match"^%s*riches%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
+		--self:Print('riches all')
+		addRichesWaypoints = true
+		limitMissing = true
+	elseif command:match"^%s*others%s+missing%s+zone%s*$" then -- markers only in the current zone, but excluding already found items
+		--self:Print('riches missing zone')
+		limitZone = true
+		limitMissing = true
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*others%s+all%s*$" then -- markers in all maps, but including already found items
+		--self:Print('riches all')
+		addOtherTreasuresWaypoints = true
+	elseif command:match"^%s*others%s+all%s+missing%s*$" then -- markers in all maps, but excluding already found items
+		--self:Print('riches all')
+		addOtherTreasuresWaypoints = true
+		limitMissing = true
+	else
+		FindersAndRichesHelper:PrintUsage()
+	end
 
-  --store actual configuration
+	--store actual configuration
   self.settings.profile.addFindersWaypoints = addFindersWaypoints
   self.settings.profile.addRichesWaypoints = addRichesWaypoints
+  self.settings.profile.addOtherTreasuresWaypoints = addOtherTreasuresWaypoints
   self.settings.profile.limitZone = limitZone
   self.settings.profile.limitMissing = limitMissing
   
@@ -365,7 +434,6 @@ function FindersAndRichesHelper:SetAchievementWaypoints(limitZone, limitMissing,
 	
 	for k, a in pairs(achievementCriteriaSet) do
 		if limitZone and zoneName == GetMapNameByID(a.map) or (a.submapEntrance ~= nil and zoneName == GetMapNameByID(a.submapEntrance.map) ) then
-		
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
 		elseif limitZone == false then
 			FindersAndRichesHelper:ProcessAchievementCriteria(a, limitMissing)
@@ -400,32 +468,31 @@ function FindersAndRichesHelper:ProcessAchievementCriteria(criteria, limitMissin
 		else
 			if (criteria.submapEntrance ~= nil) then
 				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-			elseif (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
 				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+			end
+			if (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			end
 		end
 	else
 		if(IsQuestFlaggedCompleted(criteria.qid)) then
 			if (criteria.submapEntrance ~= nil) then
 				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-			elseif (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
 				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+			end
+			if (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			end
 		else
 			if (criteria.submapEntrance ~= nil) then
 				FindersAndRichesHelper:AddWaypoint(criteria.submapEntrance.map, criteria.submapEntrance.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true), criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-				--FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.pos.f or nil, criteria.pos.x / 100, criteria.pos.y / 100, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, true))
-			elseif (criteria.npc ~= nil) then
-				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
-				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			else
 				FindersAndRichesHelper:AddWaypoint(criteria.map, criteria.positions, FindersAndRichesHelper:GetAchievementCriteriaDescription(criteria, false))
+			end
+			if (criteria.npc ~= nil) then
+				FindersAndRichesHelper:AddNpc(criteria.npc.id, criteria.map, criteria.npc.name)
 			end
 		end
 	end
@@ -463,11 +530,6 @@ local function waypointArrivalCallback(event, uid, range, distance, lastdistance
 	if  uid.private ~= nil and uid.private.submapWaypoints ~= nil then
 		--FindersAndRichesHelper:Print('cave entrance arrived adding new waypoints ' .. table.getn(uid.private.submapWaypoints))
 		FindersAndRichesHelper:AddWaypoint(uid.private.mapId, uid.private.submapWaypoints, uid.private.submapTitle)
-	end
-	if TomTom and TomTom.SetClosestWaypoint then
-		TomTom:SetClosestWaypoint()
-	elseif TomTomLite and TomTomLite.SetClosestWaypoint then
-		TomTomLite:SetClosestWaypoint()
 	end
 end
 
@@ -619,19 +681,21 @@ function FindersAndRichesHelper:InterfaceOptions()
 					}
 				}
 			}
+
 		}
 	}
 end
 
 local FINDERS_KEEPERS_INDEX=2
 local RICHES_OF_PANDARIA_INDEX=3
-local ZONE_LIMITATION_INDEX=4
+local OTHER_TREASURES_INDEX=4
+local ZONE_LIMITATION_INDEX=5
 local ZONE_LIMITATION_ZONE_ONLY_INDEX = 1
 local ZONE_LIMITATION_ALL_ZONES_INDEX = 2
-local TRACKED_TREASURES_INDEX=5
+local TRACKED_TREASURES_INDEX=6
 local TRACKED_TREASURES_MISSING_ONLY_INDEX=1 
 local TRACKED_TREASURES_ALL_TREASURES_INDEX=2
-local HIDE_MINIMAP_INDEX=6
+local HIDE_MINIMAP_INDEX=7
 local HIDE_MINIMAP_YES_INDEX=1
 local HIDE_MINIMAP_NO_INDEX=2
 
@@ -641,9 +705,8 @@ local ZONE_LIMITATION_ZONE_ONLY_ID = 1
 local ZONE_LIMITATION_ALL_ZONES_ID = 2
 local TRACKED_TREASURES_MISSING_ONLY_ID=3
 local TRACKED_TREASURES_ALL_TREASURES_ID=4
-local TRACKED_TREASURES_ALL_TREASURES_ID=5
-local HIDE_MINIMAP_YES_ID=6
-local HIDE_MINIMAP_NO_ID=7
+local HIDE_MINIMAP_YES_ID=5
+local HIDE_MINIMAP_NO_ID=6
 
 local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 			{ text = "Is Another Man's Treasure", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
@@ -653,6 +716,11 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 			},
 			{ text = "Riches of Pandaria", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
 																				FindersAndRichesHelper.settings.profile.addRichesWaypoints = checked
+																				FindersAndRichesHelper:ProcessOptions()
+																			end 
+			},
+			{ text = "Other Treasures", keepShownOnClick= true, func = 	function(self, arg1, arg2, checked) 
+																				FindersAndRichesHelper.settings.profile.addOtherTreasuresWaypoints = checked
 																				FindersAndRichesHelper:ProcessOptions()
 																			end 
 			},
@@ -753,6 +821,7 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 			},
 			{text= "Close", notCheckable=true}
 		   }
+		   
 function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
 	if menuFrame == nil then
 		menuFrame = CreateFrame("Frame", "ExampleMenuFrame", parentFrame, "UIDropDownMenuTemplate")
@@ -762,6 +831,7 @@ function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
 	--set actual values
 	menu[FINDERS_KEEPERS_INDEX].checked = self.settings.profile.addFindersWaypoints
 	menu[RICHES_OF_PANDARIA_INDEX].checked = self.settings.profile.addRichesWaypoints
+	menu[OTHER_TREASURES_INDEX].checked = self.settings.profile.addOtherTreasuresWaypoints
 
 	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ZONE_ONLY_INDEX].checked = self.settings.profile.limitZone
 	menu[ZONE_LIMITATION_INDEX].menuList[ZONE_LIMITATION_ALL_ZONES_INDEX].checked = not self.settings.profile.limitZone
