@@ -90,11 +90,11 @@ local findersKeepers	={
 						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', positions = {{ x=66.30 , y=44.70}}},
 						 {map=810, qid = 31425 , desc = 'Yaungol Fire Carrier', positions = {{ x=66.80 , y=48.00}}},
 						  -- Dread Wastes
-						 {map=858, qid = 31438 , desc = 'Blade of the Poisoned Mind', positions = {{ x=28.00 , y=42.00}}},
+						 {map=858, qid = 31438 , desc = 'Blade of the Poisoned Mind', positions = {{ x=28.90 , y=42.00}}},
 						 {map=858, qid = 31433 , desc = 'Blade of the Prime', submapEntrance={note='Cave entrance', positions = {{x=66.7, y=63.7}}, map=858}, positions = {{ x=66.3 , y=66.2}}},
 						 {map=858, qid = 31436 , desc = 'Bloodsoaked Chitin Fragment', submapEntrance={note='Cave entrance', positions = {{x=25.7, y=54.4}}, map=858}, positions = {{ x=25.70 , y=50.30},  }},
 						 {map=858, qid = 31435 , desc = 'Dissector\'s Staff of Mutation', positions = {{ x=30.20 , y=90.80}}},
-						 {map=858, qid = 31431 , desc = 'Lucid Amulet of the Agile Mind', positions = {{ x=32.00 , y=30.00}}},
+						 {map=858, qid = 31431 , desc = 'Lucid Amulet of the Agile Mind', positions = {{ x=31.51 , y=29.14}}},
 						 {map=858, qid = 31430 , desc = 'Malik\'s Stalwart Spear', positions = {{ x=48.00 , y=30.00}}},
 						 {map=858, qid = 31432 , desc = 'Manipulator\'s Talisman spot 1', positions = {{ x=42.00 , y=62.20}, { x=42.20 , y=63.60}, { x=41.60 , y=64.60} }, npc = {id='65552', name='Glinting Rapana Whelk'}}, -- npc scan id 65552 Glinting Rapana Whelk
 						 {map=858, qid = 31434 , desc = 'Swarming Cleaver of Ka\'roz', extraNote='At the bottom of the sea', positions = {{ x=56.80 , y=77.60}}},
