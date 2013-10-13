@@ -70,7 +70,7 @@ local findersKeepers	={
 						 {map=806, qid = 31399 , desc = 'Ancient Pandaren Mining Pick',  extraNote='Inside Greenstone Quarry', submapEntrance={note='Greenstone Quarry entrance and first spot', positions = {{x=46.1, y=29.1}}, map=806}, positions = {{ x=46.10 , y=29.10} , { x=44.10 , y=27.00}, {x=43.80 , y=30.70}}},
 						 {map=806, qid = 31403 , desc = 'Hammer of Ten Thunders', positions = {{ x=41.80 , y=17.60}, { x=43.00 , y=11.60}}},
 						 {map=806, qid = 31307 , desc = 'Jade Infused Blade', positions = {{ x=39.26 , y=46.65}}, npc = {id='64272', name='Jade Warrior Statue'}}, -- npc scan id 64272 Jade Warrior Statue
-						 {map=806, qid = 31397 , desc = 'Wodin\'s Mantid Shanker', positions = {{ x=39.00 , y=7.00}}},
+						 {map=806, qid = 31397 , desc = 'Wodin\'s Mantid Shanker', positions = {{ x=39.41 , y=7.22}}},
 						  --Valley of the Four Winds items
 						 {map=807, qid = 31284 , desc = 'Ancient Pandaren Fishing Charm', positions = {{ x=46.80, y=24.50}}, npc = {id=64004, name='Ghostly Pandaren Fisherman'}}, -- npc scan id 64004 Ghostly Pandaren Fisherman
 						 {map=807, qid = 31292 , desc = 'Ancient Pandaren Woodcutter', positions = {{ x=45.40 , y=38.20}}, npc = {id=64191, name='Ghostly Pandaren Craftsman'}}, -- npc scan id 64191 Ghostly Pandaren Craftsman
@@ -189,6 +189,14 @@ function eventHandler(frame, event, ...)
 			FindersAndRichesHelper:ClearWaypoints();
 			FindersAndRichesHelper:ClearNpcs();
 		end
+	elseif not FindersAndRichesHelper.settings.profile.limitZone then
+		continents = {GetMapContinents()}
+		if continents[GetCurrentMapContinent()]  ~= "Pandaria" then
+			FindersAndRichesHelper:ClearWaypoints();
+			FindersAndRichesHelper:ClearNpcs();
+		else
+			FindersAndRichesHelper:ProcessOptions()
+		end
 	else
 		FindersAndRichesHelper:ClearWaypoints();
 		FindersAndRichesHelper:ClearNpcs();
@@ -282,23 +290,23 @@ end
 
 function FindersAndRichesHelper:ProcessOptions()
   FindersAndRichesHelper:ClearNpcs();
-  FindersAndRichesHelper:ClearWaypoints();
-  if self.settings.profile.addFindersWaypoints then
-	--self:Print('processing waypoints to Finders')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, findersKeepers)
-  end
-  if self.settings.profile.addRichesWaypoints then
-	--self:Print('processing waypoints to Riches')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, richesOfPandaria)
-  end
-  if self.settings.profile.addOtherTreasuresWaypoints then
-	--self:Print('processing waypoints to Riches')
-	FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, otherTreasures)
-  end
+	FindersAndRichesHelper:ClearWaypoints();
+	if self.settings.profile.addFindersWaypoints then
+		--self:Print('processing waypoints to Finders')
+		FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, findersKeepers)
+	end
+	if self.settings.profile.addRichesWaypoints then
+		--self:Print('processing waypoints to Riches')
+		FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, richesOfPandaria)
+	end
+	if self.settings.profile.addOtherTreasuresWaypoints then
+		--self:Print('processing waypoints to Others')
+		FindersAndRichesHelper:SetAchievementWaypoints(self.settings.profile.limitZone, self.settings.profile.limitMissing, otherTreasures)
+	end
 end
 
 function FindersAndRichesHelper:PrintUsage()
-  local s
+	local s
 
   s = "\n"
   s = s .. "|cff7777ff/FindersAndRichesHelper ...|r\n"
@@ -323,7 +331,7 @@ function FindersAndRichesHelper:SlashCommand(command)
   addOtherTreasuresWaypoints = self.settings.profile.addOtherTreasuresWaypoints
   limitMissing = self.settings.profile.limitMissing
   limitZone = self.settings.profile.limitZone
-  clearWaypoints = self.settings.profile.clearWaypoints
+  clearWaypoints = false
   
 	--debug mode for test only
 	if command:match"^%s*debug%s*$" then
@@ -414,12 +422,18 @@ function FindersAndRichesHelper:SlashCommand(command)
 	end
 
 	--store actual configuration
-  self.settings.profile.addFindersWaypoints = addFindersWaypoints
-  self.settings.profile.addRichesWaypoints = addRichesWaypoints
-  self.settings.profile.addOtherTreasuresWaypoints = addOtherTreasuresWaypoints
   self.settings.profile.limitZone = limitZone
   self.settings.profile.limitMissing = limitMissing
-  
+	if not clearWaypoints then
+		self.settings.profile.addFindersWaypoints = addFindersWaypoints
+		self.settings.profile.addRichesWaypoints = addRichesWaypoints
+		self.settings.profile.addOtherTreasuresWaypoints = addOtherTreasuresWaypoints
+	else
+		self.settings.profile.addFindersWaypoints = false
+		self.settings.profile.addRichesWaypoints = false
+		self.settings.profile.addOtherTreasuresWaypoints = false
+	end
+
   FindersAndRichesHelper:ProcessOptions();
   
 end
@@ -536,22 +550,22 @@ end
 --adds a waypoint in TomTom case it is installed
 function FindersAndRichesHelper:AddWaypoint(map, mainWaypoints, title, submapId, submapWaypoints, submapTitle)
   for k, pos in pairs (mainWaypoints) do
-	  if TomTom and TomTom.AddMFWaypoint then
-		wayPointId = TomTom:AddMFWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title} )
-	  elseif TomTomLite and TomTomLite.AddWaypoint then
-		wayPointId = TomTomLite.AddWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title})
-	  end
-	  if wayPointId ~= nil then
-		  if wayPointId.callbacks~=nil then
-			wayPointId.callbacks.distance[wayPointId.arrivaldistance] = waypointArrivalCallback
-		  end
-		  currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
-		  if submapId~=nil then
-			  wayPointId.private = {}
-			  wayPointId.private.submapWaypoints = submapWaypoints
-			  wayPointId.private.mapId = submapId
-			  wayPointId.private.submapTitle = submapTitle
-		  end
+		if TomTom and TomTom.AddMFWaypoint then
+			wayPointId = TomTom:AddMFWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title} )
+		elseif TomTomLite and TomTomLite.AddWaypoint then
+			wayPointId = TomTomLite.AddWaypoint(map, pos.floorNum or nil, pos.x/100, pos.y/100, {title = title})
+		end
+		if wayPointId ~= nil then
+			if wayPointId.callbacks~=nil then
+				wayPointId.callbacks.distance[wayPointId.arrivaldistance] = waypointArrivalCallback
+			end
+			currentWayPoints[table.getn(currentWayPoints)+1] = wayPointId
+			if submapId~=nil then
+				wayPointId.private = {}
+				wayPointId.private.submapWaypoints = submapWaypoints
+				wayPointId.private.mapId = submapId
+				wayPointId.private.submapTitle = submapTitle
+			end
 	  end
   end
  
@@ -563,7 +577,7 @@ end
 
 --removes all currently tracked waypoints
 function FindersAndRichesHelper:ClearWaypoints()
-	--self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
+	self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
 	for k, wayPoint in pairs(currentWayPoints) do
 		if TomTom and TomTom.RemoveWaypoint then
 			TomTom:RemoveWaypoint(wayPoint)
@@ -578,17 +592,22 @@ end
 
 
 function FindersAndRichesHelper:OnEnable()
-  --FindersAndRichesHelper:Print("processing options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
-  FindersAndRichesHelper:ProcessOptions()
+  FindersAndRichesHelper:Print("OnEnable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
+	if updaterFrame then
+		updaterFrame:Show()
+	end 
+	FindersAndRichesHelper:ProcessOptions()
+	
 end
 
 function FindersAndRichesHelper:OnDisable()
+  FindersAndRichesHelper:Print("OnDisable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
   FindersAndRichesHelper:ClearWaypoints()
   FindersAndRichesHelper:ClearNcps()
   if updaterFrame then
     updaterFrame:Hide()
-    updaterFrame:SetParent(nil)
-    updaterFrame = nil
+    --updaterFrame:SetParent(nil)
+    --updaterFrame = nil
   end
 end
 -- LDB
