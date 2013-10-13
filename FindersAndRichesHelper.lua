@@ -577,7 +577,7 @@ end
 
 --removes all currently tracked waypoints
 function FindersAndRichesHelper:ClearWaypoints()
-	self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
+	--self:Print("removing " .. table.getn(currentWayPoints) .. " waypoints ")
 	for k, wayPoint in pairs(currentWayPoints) do
 		if TomTom and TomTom.RemoveWaypoint then
 			TomTom:RemoveWaypoint(wayPoint)
@@ -592,7 +592,7 @@ end
 
 
 function FindersAndRichesHelper:OnEnable()
-  FindersAndRichesHelper:Print("OnEnable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
+  --FindersAndRichesHelper:Print("OnEnable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
 	if updaterFrame then
 		updaterFrame:Show()
 	end 
@@ -601,7 +601,7 @@ function FindersAndRichesHelper:OnEnable()
 end
 
 function FindersAndRichesHelper:OnDisable()
-  FindersAndRichesHelper:Print("OnDisable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
+  --FindersAndRichesHelper:Print("OnDisable options " .. tostring(self.settings.profile.limitZone) .. "," .. tostring(self.settings.profile.limitMissing) .. "," .. tostring(self.settings.profile.addFindersWaypoints) .. "," .. tostring(self.settings.profile.addRichesWaypoints) )
   FindersAndRichesHelper:ClearWaypoints()
   FindersAndRichesHelper:ClearNcps()
   if updaterFrame then
@@ -827,8 +827,19 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 					}
 				}
 			},
-			{text="Hide Minimap Icon", notCheckable=true, keepShownOnClick= true, hasArrow = true, menuList = {
-					{ text = "Yes", value=HIDE_MINIMAP_YES_ID, func = function(self, arg1, arg2, checked)
+			{text = "Hide Minimap Icon", keepShownOnClick= true, vaule=HIDE_MINIMAP_INDEX, func = 	function(self, arg1, arg2, checked)
+																				hide = FindersAndRichesHelper.settings.profile.minimapIconSettings.hide
+																				FindersAndRichesHelper.settings.profile.minimapIconSettings.hide = not hide
+																				if(not hide) then --then minimapIconSettings.hide == true
+																					minimapIcon:Hide("FRH_ldbIcon")
+																				else
+																					minimapIcon:Show("FRH_ldbIcon")
+																				end
+																			end 
+			},
+			{text= "Close", notCheckable=true, func = function (self, arg1, arg2, checked) menuFrame:Hide() end} 
+			--[[{text="Hide Minimap Icon", keepShownOnClick= true, notCheckable=true, hasArrow = true, menuList = {
+					{ text = "Yes", keepShownOnClick= true, value=HIDE_MINIMAP_YES_ID, func = function(self, arg1, arg2, checked)
 																		if(not FindersAndRichesHelper.settings.profile.minimapIconSettings.hide) then -- in this case 11 is selected
 																			FindersAndRichesHelper.settings.profile.minimapIconSettings.hide = true
 																			--UIDropDownMenu_SetSelectedValue(menuFrame, HIDE_MINIMAP_NO_ID)
@@ -851,8 +862,7 @@ local menu={{ text = "FRH Options", isTitle = true, notCheckable=true},
 																			 end
 					}
 				}
-			},
-			{text= "Close", notCheckable=true}
+			},]]--
 		   }
 		   
 function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
@@ -872,8 +882,7 @@ function FindersAndRichesHelper:MinimapButtonOptions(parentFrame)
 	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_MISSING_ONLY_INDEX].checked = self.settings.profile.limitMissing
 	menu[TRACKED_TREASURES_INDEX].menuList[TRACKED_TREASURES_ALL_TREASURES_INDEX].checked = not self.settings.profile.limitMissing
 	
-	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_YES_INDEX].checked = self.settings.profile.minimapIconSettings.hide
-	menu[HIDE_MINIMAP_INDEX].menuList[HIDE_MINIMAP_NO_INDEX].checked = not self.settings.profile.minimapIconSettings.hide
+	menu[HIDE_MINIMAP_INDEX].checked = self.settings.profile.minimapIconSettings.hide
 	
 	menuFrame:SetPoint("Center", parentFrame, "Center")
 	EasyMenu(menu, menuFrame, menuFrame, 0 , 0, "MENU") 
