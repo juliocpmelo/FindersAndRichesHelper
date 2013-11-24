@@ -159,10 +159,10 @@ function eventHandler(frame, event, ...)
 	
 	-- checks the presence of either TomTom or TomTomLite and NpcScan
 	if addosnCheck == false and TomTom == nil and TomTomLite == nil then
-		self:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
+		FindersAndRichesHelper:Print("|cffffff66warning:|r This addon USES " .. "|cffff0000TomTom or TomTomLite" .. "|r without any of them the addon will not work properly. Either TomTom or TomTomLite could be found on www.curse.com")
 	end
 	if addosnCheck == false and _NPCScan == nil then 
-		self:Print("|cffffff66warning:|r NPCScan not found without it the addon will not be able to track the achievements npcs. NPCScan could be found on www.curse.com")
+		FindersAndRichesHelper:Print("|cffffff66warning:|r NPCScan not found without it the addon will not be able to track the achievements npcs. NPCScan could be found on www.curse.com")
 	end
 	addosnCheck = true;
 	
